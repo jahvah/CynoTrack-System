@@ -40,7 +40,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'register') {
         $stmt->bind_param("iss", $account_id, $first_name, $last_name);
         $stmt->execute();
         $_SESSION['role_user_id'] = $conn->insert_id;
-        header("Location: DonorProfile.php");
+        header("Location: DonorUser/DonorProfile.php");
         exit;
     }
 

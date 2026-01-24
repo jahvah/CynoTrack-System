@@ -6,7 +6,7 @@ if (isset($_SESSION['message'])) {
     <strong>{$_SESSION['message']}</strong>
     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>";
     unset($_SESSION['message']);
-    
+    //
     
 }
 
@@ -16,6 +16,6 @@ if (isset($_SESSION['success'])) {
     <strong>{$_SESSION['success']}</strong>
     <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button></div>";
     unset($_SESSION['success']);
-    
+
 }
 ?>

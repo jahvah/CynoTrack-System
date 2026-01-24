@@ -10,6 +10,7 @@ $roles = $conn->query("SELECT role_id, role_name FROM roles");
 
 <div class="container">
     <h2>Register Account</h2>
+
     <form action="store.php" method="POST">
         <input type="hidden" name="action" value="register">
 
@@ -21,12 +22,6 @@ $roles = $conn->query("SELECT role_id, role_name FROM roles");
 
         <label>Password</label>
         <input type="password" name="password" required>
-
-        <label>First Name</label>
-        <input type="text" name="first_name" required>
-
-        <label>Last Name</label>
-        <input type="text" name="last_name" required>
 
         <label>Role</label>
         <select name="role_id" required>

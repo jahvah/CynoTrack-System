@@ -1,32 +1,71 @@
 <?php
-include('../includes/config.php');
+session_start();
+include('../includes/config.php'); // mysqli connection
 include('../includes/header.php');
 include('../includes/alert.php');
 
 if(isset($_POST['login'])){
-    $username = $_POST['username'];
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
 
-    $stmt = $pdo->prepare("SELECT * FROM accounts WHERE username=?");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
+    // Use mysqli instead of PDO
+    $stmt = $conn->prepare("SELECT * FROM accounts WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
     if($user && password_verify($password, $user['password_hash'])){
-        $_SESSION['user_id'] = $user['account_id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['success'] = "Login successful!";
-        header("Location: store.php");
-        exit;
+        $_SESSION['account_id'] = $user['account_id'];
+        $_SESSION['role_id'] = $user['role_id'];
+        $_SESSION['email'] = $user['email'];
+
+        // Get role name
+        $stmt_role = $conn->prepare("SELECT role_name FROM roles WHERE role_id = ?");
+        $stmt_role->bind_param("i", $user['role_id']);
+        $stmt_role->execute();
+        $role = $stmt_role->get_result()->fetch_assoc()['role_name'];
+        $_SESSION['role'] = strtolower($role);
+
+        // Fetch role user ID
+        if($_SESSION['role'] === 'donor'){
+            $stmt2 = $conn->prepare("SELECT donor_id FROM donors_users WHERE account_id = ?");
+            $stmt2->bind_param("i", $user['account_id']);
+            $stmt2->execute();
+            $_SESSION['role_user_id'] = $stmt2->get_result()->fetch_assoc()['donor_id'];
+            header("Location: DonorDashboard.php");
+            exit;
+        }
+        elseif($_SESSION['role'] === 'recipient'){
+            $stmt2 = $conn->prepare("SELECT recipient_id FROM recipients_users WHERE account_id = ?");
+            $stmt2->bind_param("i", $user['account_id']);
+            $stmt2->execute();
+            $_SESSION['role_user_id'] = $stmt2->get_result()->fetch_assoc()['recipient_id'];
+            header("Location: RecipientDashboard.php");
+            exit;
+        }
+        elseif($_SESSION['role'] === 'self_storage'){
+            $stmt2 = $conn->prepare("SELECT storage_user_id FROM self_storage_users WHERE account_id = ?");
+            $stmt2->bind_param("i", $user['account_id']);
+            $stmt2->execute();
+            $_SESSION['role_user_id'] = $stmt2->get_result()->fetch_assoc()['storage_user_id'];
+            header("Location: StorageDashboard.php");
+            exit;
+        } else {
+            // Default redirect if role is admin/staff
+            header("Location: adminDashboard.php");
+            exit;
+        }
     } else {
-        $_SESSION['error'] = "Invalid username or password.";
+        $_SESSION['error'] = "Invalid email or password.";
     }
 }
 ?>
 
 <h2>Login</h2>
 <form method="POST">
-    <label>Username</label>
-    <input type="text" name="username" required>
+    <label>Email</label>
+    <input type="email" name="email" required>
 
     <label>Password</label>
     <input type="password" name="password" required>

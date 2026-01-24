@@ -1,0 +1,138 @@
+<?php
+session_start();
+include("../../includes/config.php");
+
+// ===== REDIRECT IF NO ACTION =====
+if (!isset($_POST['action'])) {
+    header("Location: ../login.php");
+    exit();
+}
+
+$action = $_POST['action'];
+
+// ===== UPDATE DONOR PROFILE =====
+if ($action === 'update_profile') {
+    if (!isset($_SESSION['account_id'])) {
+        header("Location: ../login.php");
+        exit();
+    }
+
+    $account_id = $_SESSION['account_id'];
+
+    // Get donor_id
+    $stmt = $conn->prepare("SELECT donor_id, profile_image FROM donors_users WHERE account_id=?");
+    $stmt->bind_param("i", $account_id);
+    $stmt->execute();
+    $donor = $stmt->get_result()->fetch_assoc();
+    if (!$donor) {
+        header("Location: DonorEditProfile.php?error=Profile not found");
+        exit();
+    }
+
+    $fields = [];
+    $types  = "";
+    $values = [];
+
+    function addField(&$fields, &$types, &$values, $name, $value, $type) {
+        if ($value !== "" && $value !== null) {
+            $fields[] = "$name=?";
+            $types .= $type;
+            $values[] = $value;
+        }
+    }
+
+    // Text fields
+    addField($fields,$types,$values,"first_name",trim($_POST['first_name']),"s");
+    addField($fields,$types,$values,"last_name",trim($_POST['last_name']),"s");
+    addField($fields,$types,$values,"medical_history",trim($_POST['medical_history']),"s");
+    addField($fields,$types,$values,"eye_color",trim($_POST['eye_color']),"s");
+    addField($fields,$types,$values,"hair_color",trim($_POST['hair_color']),"s");
+    addField($fields,$types,$values,"blood_type",trim($_POST['blood_type']),"s");
+    addField($fields,$types,$values,"ethnicity",trim($_POST['ethnicity']),"s");
+
+    // Numbers
+    if ($_POST['height_cm'] !== "") addField($fields,$types,$values,"height_cm",(int)$_POST['height_cm'],"i");
+    if ($_POST['weight_kg'] !== "") addField($fields,$types,$values,"weight_kg",(int)$_POST['weight_kg'],"i");
+
+    // Image upload
+    if (!empty($_FILES['profile_image']['name'])) {
+        $upload_dir = "../../uploads/";
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+
+        $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg','jpeg','png','gif'];
+
+        if (!in_array($ext, $allowed)) {
+            header("Location: DonorEditProfile.php?error=Invalid image type");
+            exit();
+        }
+
+        if ($_FILES['profile_image']['size'] > 2 * 1024 * 1024) {
+            header("Location: DonorEditProfile.php?error=Image too large");
+            exit();
+        }
+
+        $file_name = uniqid("donor_", true).".".$ext;
+        if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_dir.$file_name)) {
+            addField($fields,$types,$values,"profile_image",$file_name,"s");
+        }
+    }
+
+    // Execute update
+    if (count($fields) === 0) {
+        header("Location: DonorEditProfile.php?error=No changes detected");
+        exit();
+    }
+
+    $sql = "UPDATE donors_users SET ".implode(", ", $fields)." WHERE donor_id=?";
+    $types .= "i";
+    $values[] = $donor['donor_id'];
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$values);
+
+    if ($stmt->execute()) {
+        header("Location: DonorEditProfile.php?updated=1");
+    } else {
+        header("Location: DonorEditProfile.php?error=Update failed");
+    }
+    exit();
+}
+
+// ===== REGISTER DONOR =====
+if ($action === 'register') {
+    $username = trim($_POST['username']);
+    $email    = trim($_POST['email']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+
+    // Insert account
+    $stmt = $conn->prepare("
+        INSERT INTO accounts (username, email, password_hash, role_id)
+        VALUES (?, ?, ?, (SELECT role_id FROM roles WHERE role_name='Donor'))
+    ");
+    $stmt->bind_param("sss", $username, $email, $password);
+    if (!$stmt->execute()) {
+        die("Error creating account: " . $stmt->error);
+    }
+
+    $account_id = $stmt->insert_id;
+
+    // Insert donors_users row (empty profile initially)
+    $stmt2 = $conn->prepare("INSERT INTO donors_users (account_id) VALUES (?)");
+    $stmt2->bind_param("i", $account_id);
+    $stmt2->execute();
+    $donor_id = $conn->insert_id;
+
+    // Set session
+    $_SESSION['account_id']   = $account_id;
+    $_SESSION['role']         = 'donor';
+    $_SESSION['role_user_id'] = $donor_id;
+
+    // Redirect to donor profile page to complete profile
+    header("Location: DonorProfile.php");
+    exit();
+}
+
+
+
+
