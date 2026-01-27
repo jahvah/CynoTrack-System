@@ -4,83 +4,59 @@ include("../../includes/config.php");
 include("../../includes/header.php");
 include("../../includes/alert.php");
 
-// Ensure donor is logged in
-$donor_id = $_SESSION['role_user_id'] ?? 0;
-if (!$donor_id) {
-    die("Invalid session. Please register first.");
+// Ensure donor logged in
+if (!isset($_SESSION['account_id'])) {
+    die("Invalid session. Please login.");
 }
 
-// Fetch donor data
-$stmt = $conn->prepare("SELECT * FROM donors_users WHERE donor_id = ?");
-$stmt->bind_param("i", $donor_id);
+$account_id = $_SESSION['account_id'];
+
+// Fetch donor data using account_id (STANDARDIZED)
+$stmt = $conn->prepare("SELECT * FROM donors_users WHERE account_id = ?");
+$stmt->bind_param("i", $account_id);
 $stmt->execute();
 $donor = $stmt->get_result()->fetch_assoc();
 ?>
 
 <h2>Complete Your Donor Profile</h2>
 
-<form method="POST"
-      action="DonorStore.php"
-      enctype="multipart/form-data">
+<form method="POST" action="DonorStore.php" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="update_profile">
 
-    <input type="hidden" name="action" value="complete_profile">
-
-    <!-- PROFILE IMAGE -->
     <label>Profile Image</label>
     <input type="file" name="profile_image" accept="image/*">
-
     <?php if (!empty($donor['profile_image'])): ?>
-        <img src="../../uploads/<?= htmlspecialchars($donor['profile_image']); ?>"
-             width="120" height="120"
-             style="display:block;margin-top:10px;">
+        <img src="../../uploads/<?= htmlspecialchars($donor['profile_image']); ?>" width="120">
     <?php endif; ?>
 
-    <!-- FIRST NAME -->
     <label>First Name</label>
-    <input type="text" name="first_name"
-           value="<?= htmlspecialchars($donor['first_name'] ?? '') ?>">
+    <input type="text" name="first_name" value="<?= htmlspecialchars($donor['first_name'] ?? '') ?>">
 
-    <!-- LAST NAME -->
     <label>Last Name</label>
-    <input type="text" name="last_name"
-           value="<?= htmlspecialchars($donor['last_name'] ?? '') ?>">
+    <input type="text" name="last_name" value="<?= htmlspecialchars($donor['last_name'] ?? '') ?>">
 
-    <!-- HEIGHT -->
     <label>Height (cm)</label>
-    <input type="number" name="height_cm"
-           value="<?= htmlspecialchars($donor['height_cm'] ?? '') ?>">
+    <input type="number" name="height_cm" value="<?= htmlspecialchars($donor['height_cm'] ?? '') ?>">
 
-    <!-- WEIGHT -->
     <label>Weight (kg)</label>
-    <input type="number" name="weight_kg"
-           value="<?= htmlspecialchars($donor['weight_kg'] ?? '') ?>">
+    <input type="number" name="weight_kg" value="<?= htmlspecialchars($donor['weight_kg'] ?? '') ?>">
 
-    <!-- EYE COLOR -->
     <label>Eye Color</label>
-    <input type="text" name="eye_color"
-           value="<?= htmlspecialchars($donor['eye_color'] ?? '') ?>">
+    <input type="text" name="eye_color" value="<?= htmlspecialchars($donor['eye_color'] ?? '') ?>">
 
-    <!-- HAIR COLOR -->
     <label>Hair Color</label>
-    <input type="text" name="hair_color"
-           value="<?= htmlspecialchars($donor['hair_color'] ?? '') ?>">
+    <input type="text" name="hair_color" value="<?= htmlspecialchars($donor['hair_color'] ?? '') ?>">
 
-    <!-- BLOOD TYPE -->
     <label>Blood Type</label>
-    <input type="text" name="blood_type"
-           value="<?= htmlspecialchars($donor['blood_type'] ?? '') ?>">
+    <input type="text" name="blood_type" value="<?= htmlspecialchars($donor['blood_type'] ?? '') ?>">
 
-    <!-- ETHNICITY -->
     <label>Ethnicity</label>
-    <input type="text" name="ethnicity"
-           value="<?= htmlspecialchars($donor['ethnicity'] ?? '') ?>">
+    <input type="text" name="ethnicity" value="<?= htmlspecialchars($donor['ethnicity'] ?? '') ?>">
 
-    <!-- MEDICAL HISTORY -->
     <label>Medical History</label>
     <textarea name="medical_history"><?= htmlspecialchars($donor['medical_history'] ?? '') ?></textarea>
 
     <button type="submit">Save Profile</button>
 </form>
-
 
 <?php include("../../includes/footer.php"); ?>

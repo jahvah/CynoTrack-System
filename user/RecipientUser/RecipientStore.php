@@ -13,8 +13,9 @@ if (!isset($_POST['action'])) {
 
 $action = $_POST['action'];
 
-
-// COMPLETE PROFILE AND UPADTE PROFILE
+// =======================================================
+// COMPLETE PROFILE / UPDATE PROFILE
+// =======================================================
 if ($action === 'update_profile') {
 
     if (!isset($_SESSION['account_id'])) {
@@ -24,10 +25,11 @@ if ($action === 'update_profile') {
 
     $account_id = $_SESSION['account_id'];
 
-    $stmt = $conn->prepare("SELECT donor_id FROM donors_users WHERE account_id=?");
+    // Fetch recipient
+    $stmt = $conn->prepare("SELECT recipient_id FROM recipients_users WHERE account_id=?");
     $stmt->bind_param("i", $account_id);
     $stmt->execute();
-    $donor = $stmt->get_result()->fetch_assoc();
+    $recipient = $stmt->get_result()->fetch_assoc();
 
     $fields = [];
     $types  = "";
@@ -41,66 +43,57 @@ if ($action === 'update_profile') {
         }
     }
 
-    addField($fields,$types,$values,"first_name", trim($_POST['first_name']), "s");
-    addField($fields,$types,$values,"last_name", trim($_POST['last_name']), "s");
-    addField($fields,$types,$values,"medical_history", trim($_POST['medical_history']), "s");
-    addField($fields,$types,$values,"eye_color", trim($_POST['eye_color']), "s");
-    addField($fields,$types,$values,"hair_color", trim($_POST['hair_color']), "s");
-    addField($fields,$types,$values,"blood_type", trim($_POST['blood_type']), "s");
-    addField($fields,$types,$values,"ethnicity", trim($_POST['ethnicity']), "s");
+    addField($fields, $types, $values, "first_name", trim($_POST['first_name']), "s");
+    addField($fields, $types, $values, "last_name", trim($_POST['last_name']), "s");
+    addField($fields, $types, $values, "preferences", trim($_POST['preferences']), "s");
 
-    if ($_POST['height_cm'] !== "") addField($fields,$types,$values,"height_cm",(int)$_POST['height_cm'],"i");
-    if ($_POST['weight_kg'] !== "") addField($fields,$types,$values,"weight_kg",(int)$_POST['weight_kg'],"i");
-
-    // IMAGE
+    // IMAGE UPLOAD
     if (!empty($_FILES['profile_image']['name'])) {
         $upload_dir = "../../uploads/";
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 
         $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg','jpeg','png','gif'];
+        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
 
         if (!in_array($ext, $allowed)) {
-            header("Location: DonorEditProfile.php?error=Invalid image type");
+            header("Location: RecipientEditProfile.php?error=Invalid image type");
             exit();
         }
 
         if ($_FILES['profile_image']['size'] > 2 * 1024 * 1024) {
-            header("Location: DonorEditProfile.php?error=Image too large");
+            header("Location: RecipientEditProfile.php?error=Image too large");
             exit();
         }
 
-        $file_name = uniqid("donor_", true).".".$ext;
+        $file_name = uniqid("recipient_", true).".".$ext;
         if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_dir.$file_name)) {
-            addField($fields,$types,$values,"profile_image",$file_name,"s");
+            addField($fields, $types, $values, "profile_image", $file_name, "s");
         }
     }
 
     if (count($fields) === 0) {
-        header("Location: DonorEditProfile.php?error=No changes detected");
+        header("Location: RecipientEditProfile.php?error=No changes detected");
         exit();
     }
 
-    $sql = "UPDATE donors_users SET ".implode(", ", $fields)." WHERE donor_id=?";
+    $sql = "UPDATE recipients_users SET ".implode(", ", $fields)." WHERE recipient_id=?";
     $types .= "i";
-    $values[] = $donor['donor_id'];
+    $values[] = $recipient['recipient_id'];
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param($types, ...$values);
 
     if ($stmt->execute()) {
-        header("Location: DonorDashboard.php?profile_updated=1");
+        header("Location: RecipientDashboard.php?profile_updated=1");
     } else {
-        header("Location: DonorEditProfile.php?error=Update failed");
+        header("Location: RecipientEditProfile.php?error=Update failed");
     }
     exit();
 }
 
-
-
-
-// REGISTER DONOR
-
+// =======================================================
+// REGISTER RECIPIENT
+// =======================================================
 if ($action === 'register') {
 
     $username = trim($_POST['username']);
@@ -109,21 +102,23 @@ if ($action === 'register') {
 
     $stmt = $conn->prepare("
         INSERT INTO accounts (username, email, password_hash, role_id)
-        VALUES (?, ?, ?, (SELECT role_id FROM roles WHERE role_name='Donor'))
+        VALUES (?, ?, ?, (SELECT role_id FROM roles WHERE role_name='Recipient'))
     ");
     $stmt->bind_param("sss", $username, $email, $password);
     $stmt->execute();
 
     $account_id = $stmt->insert_id;
 
-    // Create empty donor profile row
-    $stmt2 = $conn->prepare("INSERT INTO donors_users (account_id) VALUES (?)");
+    // Create empty recipient profile row
+    $stmt2 = $conn->prepare("INSERT INTO recipients_users (account_id) VALUES (?)");
     $stmt2->bind_param("i", $account_id);
     $stmt2->execute();
 
     $_SESSION['account_id'] = $account_id;
-    $_SESSION['role'] = 'donor';
+    $_SESSION['role'] = 'recipient';
+    $_SESSION['role_user_id'] = $conn->insert_id;
 
-    header("Location: DonorProfile.php");
+    // Redirect to complete profile
+    header("Location: RecipientProfile.php");
     exit();
 }
