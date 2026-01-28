@@ -47,14 +47,12 @@ function registerUser($conn, $username, $email, $password, $role_id, $first_name
             header("Location: RecipientUser/RecipientProfile.php"); // complete profile
             exit;
 
-        case 'self-storage user':
         case 'self-storage':
-        case 'storage': // allow some flexibility in naming
             $stmt = $conn->prepare("INSERT INTO self_storage_users (account_id, first_name, last_name) VALUES (?, ?, ?)");
             $stmt->bind_param("iss", $account_id, $first_name, $last_name);
             $stmt->execute();
             $_SESSION['role_user_id'] = $conn->insert_id;
-            header("Location: StorageProfile.php"); // complete profile
+            header("Location: SelfStorageUser/SelfStorageProfile.php"); // complete profile
             exit;
 
         default:
