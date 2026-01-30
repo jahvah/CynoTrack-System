@@ -4,9 +4,11 @@ include('./includes/header.php');
 
 ?>
 
-<h2>Welcome to the Dashboard</h2>
-<p>Use the navigation above to manage donors, recipients, specimens, appointments, and transactions.</p>
-
+<?php
+$password = "12345";
+$hashed = password_hash($password, PASSWORD_DEFAULT);
+echo $hashed;
+?>
 <?php
 include('./includes/footer.php');
 ?>

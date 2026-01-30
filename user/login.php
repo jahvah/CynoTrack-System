@@ -27,13 +27,13 @@ if(isset($_POST['login'])){
         $role = $stmt_role->get_result()->fetch_assoc()['role_name'];
         $_SESSION['role'] = strtolower($role);
 
-        // Fetch role user ID
+        // Redirect based on role
         if($_SESSION['role'] === 'donor'){
             $stmt2 = $conn->prepare("SELECT donor_id FROM donors_users WHERE account_id = ?");
             $stmt2->bind_param("i", $user['account_id']);
             $stmt2->execute();
             $_SESSION['role_user_id'] = $stmt2->get_result()->fetch_assoc()['donor_id'];
-            header("Location: DonorDashboard.php");
+            header("Location: DonorUser/DonorDashboard.php");
             exit;
         }
         elseif($_SESSION['role'] === 'recipient'){
@@ -41,23 +41,32 @@ if(isset($_POST['login'])){
             $stmt2->bind_param("i", $user['account_id']);
             $stmt2->execute();
             $_SESSION['role_user_id'] = $stmt2->get_result()->fetch_assoc()['recipient_id'];
-            header("Location: RecipientDashboard.php");
+            header("Location: RecipientUser/RecipientDashboard.php");
             exit;
         }
-        elseif($_SESSION['role'] === 'self_storage'){
+        elseif($_SESSION['role'] === 'self-storage'){
             $stmt2 = $conn->prepare("SELECT storage_user_id FROM self_storage_users WHERE account_id = ?");
             $stmt2->bind_param("i", $user['account_id']);
             $stmt2->execute();
             $_SESSION['role_user_id'] = $stmt2->get_result()->fetch_assoc()['storage_user_id'];
-            header("Location: StorageDashboard.php");
+            header("Location: SelfStorageUser/SelfStorageDashboard.php");
             exit;
-        } else {
-            // Default redirect if role is admin/staff
-            header("Location: adminDashboard.php");
+        }
+        elseif($_SESSION['role'] === 'admin'){
+            // Admin login
+            $_SESSION['role_user_id'] = $user['account_id']; // for admin, we can just use account_id
+            header("Location: AdminUser/AdminDashboard.php");
+            exit;
+        }
+        else{
+            // fallback for other roles
+            header("Location: login.php?error=role_not_found");
             exit;
         }
     } else {
-        $_SESSION['error'] = "Invalid email or password.";
+        // Invalid email/password
+        header("Location: login.php?error=invalid_credentials");
+        exit;
     }
 }
 ?>
