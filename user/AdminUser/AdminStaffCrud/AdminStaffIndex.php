@@ -4,17 +4,13 @@ session_start();
 include('../../../includes/config.php');
 include('../../../includes/header.php');
 
-/* ==============================
-   ADMIN ACCESS PROTECTION
-============================== */
+// admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../../unauthorized.php");
     exit();
 }
 
-/* ==============================
-   FETCH STAFF DATA
-============================== */
+//fetch staff data
 $query = "SELECT s.staff_id, s.first_name, s.last_name, s.profile_image, a.email
           FROM staff s
           JOIN accounts a ON s.account_id = a.account_id
@@ -111,7 +107,7 @@ $result = mysqli_query($conn, $query);
 
                     <!-- ACTION BUTTONS -->
                     <td>
-                        <a href="AdminStaffEdit.php?id=<?= $row['staff_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="AdminStaffUpdate.php?id=<?= $row['staff_id']; ?>" class="action-btn edit-btn">Edit</a>
                         <a href="AdminStaffDelete.php?id=<?= $row['staff_id']; ?>" 
                            class="action-btn delete-btn"
                            onclick="return confirm('Are you sure you want to delete this staff?');">

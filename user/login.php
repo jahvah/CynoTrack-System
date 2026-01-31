@@ -58,6 +58,7 @@ if(isset($_POST['login'])){
             header("Location: AdminUser/AdminDashboard.php");
             exit;
         }
+        
         else{
             // fallback for other roles
             header("Location: login.php?error=role_not_found");
