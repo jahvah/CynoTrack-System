@@ -10,8 +10,8 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-//fetch staff data
-$query = "SELECT s.staff_id, s.first_name, s.last_name, s.profile_image, a.email
+//fetch staff data including account status
+$query = "SELECT s.staff_id, s.first_name, s.last_name, s.profile_image, a.email, a.status
           FROM staff s
           JOIN accounts a ON s.account_id = a.account_id
           ORDER BY s.staff_id DESC";
@@ -20,56 +20,56 @@ $result = mysqli_query($conn, $query);
 ?>
 
 <style>
-    .container { padding: 30px; }
+.container { padding: 30px; }
 
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    .create-btn {
-        padding: 10px 18px;
-        background: green;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-    }
+.create-btn {
+    padding: 10px 18px;
+    background: green;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
 
-    th, td {
-        padding: 10px;
-        border: 1px solid #ccc;
-        text-align: center;
-    }
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
 
-    th {
-        background: #007bff;
-        color: white;
-    }
+th {
+    background: #007bff;
+    color: white;
+}
 
-    img {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-        border-radius: 50%;
-    }
+img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+}
 
-    .action-btn {
-        padding: 6px 10px;
-        text-decoration: none;
-        border-radius: 4px;
-        color: white;
-        font-size: 13px;
-    }
+.action-btn {
+    padding: 6px 10px;
+    text-decoration: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 13px;
+}
 
-    .edit-btn { background: orange; }
-    .delete-btn { background: red; }
+.edit-btn { background: orange; }
+.delete-btn { background: red; }
 </style>
 
 <div class="container">
@@ -86,6 +86,7 @@ $result = mysqli_query($conn, $query);
             <th>Profile</th>
             <th>Full Name</th>
             <th>Email</th>
+            <th>Status</th> <!-- NEW STATUS COLUMN -->
             <th>Actions</th>
         </tr>
 
@@ -104,6 +105,7 @@ $result = mysqli_query($conn, $query);
 
                     <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
                     <td><?= htmlspecialchars($row['email']); ?></td>
+                    <td><?= ucfirst(htmlspecialchars($row['status'])); ?></td> <!-- SHOW STATUS -->
 
                     <!-- ACTION BUTTONS -->
                     <td>
@@ -118,7 +120,7 @@ $result = mysqli_query($conn, $query);
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="5">No staff records found.</td>
+                <td colspan="6">No staff records found.</td>
             </tr>
         <?php endif; ?>
     </table>

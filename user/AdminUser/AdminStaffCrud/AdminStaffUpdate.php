@@ -15,9 +15,9 @@ if (!isset($_GET['id'])) {
 
 $staff_id = intval($_GET['id']);
 
-/* Get needed info */
+/* Fetch staff + account info */
 $stmt = $conn->prepare("
-    SELECT s.staff_id, s.account_id, s.profile_image, a.username
+    SELECT s.staff_id, s.account_id, s.first_name, s.last_name, s.profile_image, a.username, a.status
     FROM staff s
     JOIN accounts a ON s.account_id = a.account_id
     WHERE s.staff_id = ?
@@ -35,19 +35,10 @@ $staff = $result->fetch_assoc();
 ?>
 
 <style>
-
-    label {
-    display: block;
-    margin-top: 15px;
-}
-
-img {
-    display: block;
-}
-
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
-input { width: 100%; padding: 10px; margin: 10px 0; }
+label, select { display: block; margin-top: 15px; }
+input, select { width: 100%; padding: 10px; margin: 10px 0; }
 button {
     padding: 10px 15px;
     background: green;
@@ -57,8 +48,8 @@ button {
 .locked { background: #eee; }
 img {
     width: 120px;
-    margin: 10px 0;
     border-radius: 8px;
+    display: block;
 }
 </style>
 
@@ -75,15 +66,15 @@ img {
         <input type="text" value="<?= htmlspecialchars($staff['username']); ?>" class="locked" disabled>
 
         <!-- Current Profile Picture -->
-        <label>Current Profile Image</label><br>
+        <label>Current Profile Image</label>
         <?php if (!empty($staff['profile_image'])): ?>
             <img src="../../uploads/<?= htmlspecialchars($staff['profile_image']); ?>" alt="Profile Image">
         <?php else: ?>
             <p>No image uploaded</p>
         <?php endif; ?>
 
-        <!-- Empty Update Fields -->
-        <label>New Email</label>
+        <!-- Empty fields to update -->
+        <label>New email</label>
         <input type="email" name="email" placeholder="Enter new email">
 
         <label>New First Name</label>
@@ -94,6 +85,14 @@ img {
 
         <label>Change Profile Image</label>
         <input type="file" name="profile_image">
+
+        <!-- New Status -->
+        <label>Account Status</label>
+        <select name="status">
+            <option value="active" <?= $staff['status'] === 'active' ? 'selected' : ''; ?>>Active</option>
+            <option value="inactive" <?= $staff['status'] === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
+            <option value="pending" <?= $staff['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
+        </select>
 
         <button type="submit">Update Staff</button>
     </form>

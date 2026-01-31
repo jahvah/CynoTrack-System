@@ -13,7 +13,7 @@ if (!isset($_POST['action'])) {
 }
 
 /* ==============================
-   CREATE STAFF  (UNCHANGED)
+   CREATE STAFF  (UPDATED: STATUS ADDED)
 ============================= */
 if ($_POST['action'] === 'AdminStaffStore') {
 
@@ -22,11 +22,14 @@ if ($_POST['action'] === 'AdminStaffStore') {
     $password   = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $first_name = trim($_POST['first_name']);
     $last_name  = trim($_POST['last_name']);
+    $status     = $_POST['status'] ?? 'active'; // get selected status, default to active
 
+    // Get role_id for staff
     $roleQuery = mysqli_query($conn, "SELECT role_id FROM roles WHERE role_name='staff'");
     $role = mysqli_fetch_assoc($roleQuery);
     $role_id = $role['role_id'];
 
+    // Handle image upload
     $image_name = null;
     if (!empty($_FILES['profile_image']['name'])) {
         $target_dir = "../../uploads/";
@@ -34,13 +37,15 @@ if ($_POST['action'] === 'AdminStaffStore') {
         move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_dir . $image_name);
     }
 
-    $stmt1 = $conn->prepare("INSERT INTO accounts (username, email, password_hash, role_id, status) VALUES (?, ?, ?, ?, 'active')");
-    $stmt1->bind_param("sssi", $username, $email, $password, $role_id);
+    // Insert into accounts table with selected status
+    $stmt1 = $conn->prepare("INSERT INTO accounts (username, email, password_hash, role_id, status) VALUES (?, ?, ?, ?, ?)");
+    $stmt1->bind_param("sssis", $username, $email, $password, $role_id, $status);
 
     if ($stmt1->execute()) {
 
         $account_id = $stmt1->insert_id;
 
+        // Insert into staff table
         $stmt2 = $conn->prepare("INSERT INTO staff (account_id, first_name, last_name, profile_image) VALUES (?, ?, ?, ?)");
         $stmt2->bind_param("isss", $account_id, $first_name, $last_name, $image_name);
 
@@ -56,7 +61,6 @@ if ($_POST['action'] === 'AdminStaffStore') {
     }
 }
 
-
 /* ==============================
    UPDATE STAFF
 ============================= */
@@ -68,6 +72,7 @@ if ($_POST['action'] === 'AdminStaffUpdate') {
     $email      = trim($_POST['email']);
     $first_name = trim($_POST['first_name']);
     $last_name  = trim($_POST['last_name']);
+    $status     = trim($_POST['status']); // new status from form
 
     /* Update email */
     if (!empty($email)) {
@@ -75,6 +80,15 @@ if ($_POST['action'] === 'AdminStaffUpdate') {
         $stmt->bind_param("si", $email, $account_id);
         if (!$stmt->execute()) {
             die("Email update error: " . $stmt->error);
+        }
+    }
+
+    /* Update status */
+    if (!empty($status) && in_array($status, ['active','inactive','pending'])) {
+        $stmt = $conn->prepare("UPDATE accounts SET status=? WHERE account_id=?");
+        $stmt->bind_param("si", $status, $account_id);
+        if (!$stmt->execute()) {
+            die("Status update error: " . $stmt->error);
         }
     }
 
@@ -99,7 +113,7 @@ if ($_POST['action'] === 'AdminStaffUpdate') {
     /* Update profile image */
     if (!empty($_FILES['profile_image']['name'])) {
         $target_dir = "../../uploads/";
-        $image_name = time() . "_" . basename($_FILES["profile_image"]["name"]);
+        $image_name = time() . "_" . basename($_FILES["profile_image"]["tmp_name"]);
         move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_dir . $image_name);
 
         $stmt = $conn->prepare("UPDATE staff SET profile_image=? WHERE staff_id=?");
@@ -112,4 +126,8 @@ if ($_POST['action'] === 'AdminStaffUpdate') {
     header("Location: AdminStaffIndex.php?success=staff_updated");
     exit();
 }
+
+
+
+
 ?>

@@ -10,15 +10,15 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
 ?>
 
 <style>
-    .container { padding: 30px; }
-    form { max-width: 500px; margin: auto; }
-    input { width: 100%; padding: 10px; margin: 10px 0; }
-    button {
-        padding: 10px 15px;
-        background: green;
-        color: white;
-        border: none;
-    }
+.container { padding: 30px; }
+form { max-width: 500px; margin: auto; }
+input, select { width: 100%; padding: 10px; margin: 10px 0; }
+button {
+    padding: 10px 15px;
+    background: green;
+    color: white;
+    border: none;
+}
 </style>
 
 <div class="container">
@@ -41,6 +41,13 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
 
         <label>Last Name</label>
         <input type="text" name="last_name" required>
+
+        <label>Status</label>
+        <select name="status" required>
+            <option value="active" selected>Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending</option>
+        </select>
 
         <label>Profile Image</label>
         <input type="file" name="profile_image">
