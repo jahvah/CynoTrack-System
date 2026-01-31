@@ -57,6 +57,12 @@ if ($_SESSION['role'] !== 'admin') {
     <a href="AdminStaffCrud/AdminStaffIndex.php" class="dashboard-btn">
         Manage Staff
     </a>
+
+    <!-- BUTTON TO DONOR PAGE -->
+    <a href="AdminDonorCrud/AdminDonorIndex.php" class="dashboard-btn" style="margin-left: 20px;">
+        Manage Donors
+    </a>
 </div>
+
 
 <?php include('../../includes/footer.php'); ?>

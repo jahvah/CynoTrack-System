@@ -1,0 +1,89 @@
+<?php
+session_start();
+include('../../../includes/config.php');
+include('../../../includes/header.php');
+
+// Admin access only
+if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../../unauthorized.php");
+    exit();
+}
+?>
+
+<style>
+.container { padding: 30px; }
+form { max-width: 600px; margin: auto; }
+input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; }
+button {
+    padding: 10px 15px;
+    background: green;
+    color: white;
+    border: none;
+}
+</style>
+
+<div class="container">
+    <h2>Add New Donor</h2>
+
+    <form action="AdminDonorStore.php" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="AdminDonorStore">
+
+        <!-- Account Info -->
+        <label>Username</label>
+        <input type="text" name="username" required>
+
+        <label>Email</label>
+        <input type="email" name="email" required>
+
+        <label>Password</label>
+        <input type="password" name="password" required>
+
+        <!-- Donor Info -->
+        <label>First Name</label>
+        <input type="text" name="first_name" required>
+
+        <label>Last Name</label>
+        <input type="text" name="last_name" required>
+
+        <label>Medical History</label>
+        <textarea name="medical_history" rows="4"></textarea>
+
+        <label>Evaluation Status</label>
+        <select name="evaluation_status" required>
+            <option value="pending" selected>Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+        </select>
+
+        <label>Active Status</label>
+        <select name="active_status" required>
+            <option value="1" selected>Active</option>
+            <option value="0">Inactive</option>
+        </select>
+
+        <label>Height (cm)</label>
+        <input type="number" name="height_cm" min="50" max="250">
+
+        <label>Weight (kg)</label>
+        <input type="number" name="weight_kg" min="20" max="200">
+
+        <label>Eye Color</label>
+        <input type="text" name="eye_color">
+
+        <label>Hair Color</label>
+        <input type="text" name="hair_color">
+
+        <label>Blood Type</label>
+        <input type="text" name="blood_type">
+
+        <label>Ethnicity</label>
+        <input type="text" name="ethnicity">
+
+        <label>Profile Image</label>
+        <input type="file" name="profile_image">
+
+        <button type="submit">Create Donor</button>
+    </form>
+</div>
+
+<?php include('../../../includes/footer.php'); ?>
