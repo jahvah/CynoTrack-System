@@ -19,7 +19,7 @@ if (!isset($_SESSION['account_id'])) {
 
 // Logged in but NOT admin
 if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../unauthorized.php"); // create this page or redirect to home
+    header("Location: ../unauthorized.php");
     exit();
 }
 ?>
@@ -43,6 +43,7 @@ if ($_SESSION['role'] !== 'admin') {
         background-color: #007bff;
         border-radius: 6px;
         transition: 0.3s;
+        margin: 10px;
     }
 
     .dashboard-btn:hover {
@@ -53,16 +54,20 @@ if ($_SESSION['role'] !== 'admin') {
 <div class="dashboard-container">
     <h1 class="dashboard-title">Admin Dashboard</h1>
 
-    <!-- BUTTON TO STAFF PAGE -->
+    <!-- STAFF -->
     <a href="AdminStaffCrud/AdminStaffIndex.php" class="dashboard-btn">
         Manage Staff
     </a>
 
-    <!-- BUTTON TO DONOR PAGE -->
-    <a href="AdminDonorCrud/AdminDonorIndex.php" class="dashboard-btn" style="margin-left: 20px;">
+    <!-- DONORS -->
+    <a href="AdminDonorCrud/AdminDonorIndex.php" class="dashboard-btn">
         Manage Donors
     </a>
-</div>
 
+    <!-- ✅ RECIPIENTS -->
+    <a href="AdminRecipientCrud/AdminRecipientIndex.php" class="dashboard-btn">
+        Manage Recipients
+    </a>
+</div>
 
 <?php include('../../includes/footer.php'); ?>

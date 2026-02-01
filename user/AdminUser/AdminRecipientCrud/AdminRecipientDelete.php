@@ -2,30 +2,28 @@
 session_start();
 include('../../../includes/config.php');
 
-// Admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../../unauthorized.php");
     exit();
 }
 
-// Check if donor ID is provided
 if (!isset($_GET['id'])) {
-    header("Location: AdminDonorIndex.php");
+    header("Location: AdminRecipientIndex.php");
     exit();
 }
 
-$donor_id = intval($_GET['id']);
+$recipient_id = intval($_GET['id']);
 
 /* =========================
-   GET ACCOUNT ID + IMAGE
+   STEP 1: GET ACCOUNT ID + IMAGE
 ========================= */
-$stmt = $conn->prepare("SELECT account_id, profile_image FROM donors_users WHERE donor_id=?");
-$stmt->bind_param("i", $donor_id);
+$stmt = $conn->prepare("SELECT account_id, profile_image FROM recipients_users WHERE recipient_id=?");
+$stmt->bind_param("i", $recipient_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    header("Location: AdminDonorIndex.php");
+    header("Location: AdminRecipientIndex.php");
     exit();
 }
 
@@ -34,16 +32,16 @@ $account_id = $data['account_id'];
 $image = $data['profile_image'];
 
 /* =========================
-   DELETE DONOR RECORD
+   STEP 2: DELETE RECIPIENT RECORD
 ========================= */
-$stmt = $conn->prepare("DELETE FROM donors_users WHERE donor_id=?");
-$stmt->bind_param("i", $donor_id);
+$stmt = $conn->prepare("DELETE FROM recipients_users WHERE recipient_id=?");
+$stmt->bind_param("i", $recipient_id);
 if (!$stmt->execute()) {
-    die("Donor delete error: " . $stmt->error);
+    die("Recipient delete error: " . $stmt->error);
 }
 
 /* =========================
-   DELETE ACCOUNT RECORD
+   STEP 3: DELETE ACCOUNT RECORD
 ========================= */
 $stmt = $conn->prepare("DELETE FROM accounts WHERE account_id=?");
 $stmt->bind_param("i", $account_id);
@@ -52,12 +50,12 @@ if (!$stmt->execute()) {
 }
 
 /* =========================
-   DELETE PROFILE IMAGE FILE
+   STEP 4: DELETE PROFILE IMAGE FILE
 ========================= */
-if (!empty($image) && file_exists("../../../uploads/" . $image)) {
+if (!empty($image) && file_exists("../../uploads/" . $image)) {
     unlink("../../../uploads/" . $image);
 }
 
-header("Location: AdminDonorIndex.php?success=donor_deleted");
+header("Location: AdminRecipientIndex.php?success=recipient_deleted");
 exit();
 ?>
