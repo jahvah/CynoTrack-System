@@ -64,9 +64,14 @@ if ($_SESSION['role'] !== 'admin') {
         Manage Donors
     </a>
 
-    <!-- ✅ RECIPIENTS -->
+    <!-- RECIPIENTS -->
     <a href="AdminRecipientCrud/AdminRecipientIndex.php" class="dashboard-btn">
         Manage Recipients
+    </a>
+
+    <!-- SELF-STORAGE USERS -->
+    <a href="AdminSelfStorageCrud/AdminSelfStorageIndex.php" class="dashboard-btn">
+        Manage Self-Storage Users
     </a>
 </div>
 
