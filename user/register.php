@@ -11,6 +11,15 @@ $roles = $conn->query("SELECT role_id, role_name FROM roles");
 <div class="container">
     <h2>Register Account</h2>
 
+    <?php
+    if(isset($_GET['error'])){
+        if($_GET['error'] == 'username_exists') echo "<p style='color:red'>Username already taken.</p>";
+        if($_GET['error'] == 'email_exists') echo "<p style='color:red'>Email already registered.</p>";
+        if($_GET['error'] == 'system_error') echo "<p style='color:red'>System error. Try again.</p>";
+        if($_GET['error'] == 'role_error') echo "<p style='color:red'>Role selection error.</p>";
+    }
+    ?>
+
     <form action="store.php" method="POST">
         <input type="hidden" name="action" value="register">
 
@@ -22,6 +31,12 @@ $roles = $conn->query("SELECT role_id, role_name FROM roles");
 
         <label>Password</label>
         <input type="password" name="password" required>
+
+        <label>First Name</label>
+        <input type="text" name="first_name" required>
+
+        <label>Last Name</label>
+        <input type="text" name="last_name" required>
 
         <label>Role</label>
         <select name="role_id" required>

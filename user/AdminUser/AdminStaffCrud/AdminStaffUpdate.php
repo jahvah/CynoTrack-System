@@ -44,17 +44,32 @@ button {
     background: green;
     color: white;
     border: none;
+    cursor: pointer;
 }
 .locked { background: #eee; }
-img {
-    width: 120px;
-    border-radius: 8px;
-    display: block;
+img { width: 120px; border-radius: 8px; display: block; }
+.message {
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 5px;
 }
+.error { background:#f8d7da; color:#721c24; }
+.success { background:#d4edda; color:#155724; }
 </style>
 
 <div class="container">
     <h2>Update Staff</h2>
+
+    <!-- Display messages -->
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="message error"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
 
     <form action="AdminStaffStore.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action" value="AdminStaffUpdate">
@@ -73,8 +88,8 @@ img {
             <p>No image uploaded</p>
         <?php endif; ?>
 
-        <!-- Empty fields to update -->
-        <label>New email</label>
+        <!-- Fields to update -->
+        <label>New Email</label>
         <input type="email" name="email" placeholder="Enter new email">
 
         <label>New First Name</label>

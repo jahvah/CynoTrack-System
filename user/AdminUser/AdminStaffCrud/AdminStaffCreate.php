@@ -4,7 +4,7 @@ include('../../../includes/config.php');
 include('../../../includes/header.php');
 
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../../unauthorized.php");
+    header("Location: ../../../unauthorized.php");
     exit();
 }
 ?>
@@ -18,11 +18,30 @@ button {
     background: green;
     color: white;
     border: none;
+    cursor: pointer;
 }
+.message {
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+.error { background:#f8d7da; color:#721c24; }
+.success { background:#d4edda; color:#155724; }
 </style>
 
 <div class="container">
     <h2>Add New Staff</h2>
+
+    <!-- Display messages -->
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="message error"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
 
     <form action="AdminStaffStore.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action" value="AdminStaffStore">
