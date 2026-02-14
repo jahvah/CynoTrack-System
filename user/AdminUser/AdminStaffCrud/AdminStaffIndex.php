@@ -6,7 +6,7 @@ include('../../../includes/header.php');
 
 // admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../../unauthorized.php");
+    header("Location: ../../../unauthorized.php");
     exit();
 }
 
@@ -97,7 +97,7 @@ img {
 
                     <td>
                         <?php if (!empty($row['profile_image'])): ?>
-                            <img src="../../uploads/<?= htmlspecialchars($row['profile_image']); ?>">
+                            <img src="../../../uploads/<?= htmlspecialchars($row['profile_image']); ?>">
                         <?php else: ?>
                             No Image
                         <?php endif; ?>

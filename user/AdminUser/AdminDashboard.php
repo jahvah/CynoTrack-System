@@ -1,15 +1,10 @@
 <?php
 session_start();
 
-/* ==============================
-   INCLUDE FILES (OUTSIDE FOLDER)
-============================== */
 include('../../includes/config.php');
 include('../../includes/header.php');
 
-/* ==============================
-   ADMIN ACCESS PROTECTION
-============================== */
+// admin access only
 
 // Not logged in
 if (!isset($_SESSION['account_id'])) {
@@ -19,7 +14,7 @@ if (!isset($_SESSION['account_id'])) {
 
 // Logged in but NOT admin
 if ($_SESSION['role'] !== 'admin') {
-    header("Location: ../unauthorized.php");
+    header("Location: ../../../unauthorized.php");
     exit();
 }
 ?>

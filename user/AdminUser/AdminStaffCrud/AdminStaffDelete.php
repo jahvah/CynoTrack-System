@@ -3,7 +3,7 @@ session_start();
 include('../../../includes/config.php');
 
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../../unauthorized.php");
+    header("Location: ../../../unauthorized.php");
     exit();
 }
 
@@ -14,9 +14,8 @@ if (!isset($_GET['id'])) {
 
 $staff_id = intval($_GET['id']);
 
-/* =========================
-   GET ACCOUNT ID + IMAGE
-========================= */
+
+//get account id and image
 $stmt = $conn->prepare("SELECT account_id, profile_image FROM staff WHERE staff_id=?");
 $stmt->bind_param("i", $staff_id);
 $stmt->execute();
@@ -31,29 +30,23 @@ $data = $result->fetch_assoc();
 $account_id = $data['account_id'];
 $image = $data['profile_image'];
 
-/* =========================
-   DELETE STAFF RECORD
-========================= */
+//delete staff
 $stmt = $conn->prepare("DELETE FROM staff WHERE staff_id=?");
 $stmt->bind_param("i", $staff_id);
 if (!$stmt->execute()) {
     die("Staff delete error: " . $stmt->error);
 }
 
-/* =========================
-   DELETE ACCOUNT RECORD
-========================= */
+//delete account
 $stmt = $conn->prepare("DELETE FROM accounts WHERE account_id=?");
 $stmt->bind_param("i", $account_id);
 if (!$stmt->execute()) {
     die("Account delete error: " . $stmt->error);
 }
 
-/* =========================
-   DELETE PROFILE IMAGE FILE
-========================= */
+//delete image file
 if (!empty($image) && file_exists("../../uploads/" . $image)) {
-    unlink("../../uploads/" . $image);
+    unlink("../../../uploads/" . $image);
 }
 
 header("Location: AdminStaffIndex.php?success=staff_deleted");

@@ -6,12 +6,25 @@ include('../../../includes/header.php');
 
 // admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../../unauthorized.php");
+    header("Location: ../../../unauthorized.php");
     exit();
 }
 
-//fetch donor data including account status
-$query = "SELECT d.donor_id, d.first_name, d.last_name, d.profile_image, a.email, a.status
+// fetch donor data including account + donor details
+$query = "SELECT 
+            d.donor_id, 
+            d.first_name, 
+            d.last_name, 
+            d.profile_image,
+            d.medical_history,
+            d.evaluation_status,
+            d.active_status,
+            d.height_cm,
+            d.weight_kg,
+            d.blood_type,
+            d.ethnicity,
+            a.email, 
+            a.status
           FROM donors_users d
           JOIN accounts a ON d.account_id = a.account_id
           ORDER BY d.donor_id DESC";
@@ -19,6 +32,8 @@ $query = "SELECT d.donor_id, d.first_name, d.last_name, d.profile_image, a.email
 $result = mysqli_query($conn, $query);
 ?>
 
+
+<!-- style para sa table at layout -->
 <style>
 .container { padding: 30px; }
 
@@ -40,10 +55,11 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    font-size: 13px;
 }
 
 th, td {
-    padding: 10px;
+    padding: 8px;
     border: 1px solid #ccc;
     text-align: center;
 }
@@ -65,18 +81,38 @@ img {
     text-decoration: none;
     border-radius: 4px;
     color: white;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .edit-btn { background: orange; }
 .delete-btn { background: red; }
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+}
+
+.green { background: green; }
+.red { background: red; }
+.yellow { background: orange; }
 </style>
 
 <div class="container">
 
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
     <div class="top-bar">
         <h2>Donor Management</h2>
-        <!-- CREATE BUTTON -->
         <a href="AdminDonorCreate.php" class="create-btn">+ Add Donor</a>
     </div>
 
@@ -86,7 +122,14 @@ img {
             <th>Profile</th>
             <th>Full Name</th>
             <th>Email</th>
-            <th>Status</th> <!-- ACCOUNT STATUS -->
+            <th>Medical History</th>
+            <th>Evaluation</th>
+            <th>Active</th>
+            <th>Height</th>
+            <th>Weight</th>
+            <th>Blood Type</th>
+            <th>Ethnicity</th>
+            <th>Account Status</th>
             <th>Actions</th>
         </tr>
 
@@ -105,9 +148,50 @@ img {
 
                     <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
                     <td><?= htmlspecialchars($row['email']); ?></td>
-                    <td><?= ucfirst(htmlspecialchars($row['status'])); ?></td> <!-- SHOW ACCOUNT STATUS -->
 
-                    <!-- ACTION BUTTONS -->
+                    <td><?= htmlspecialchars($row['medical_history'] ?? 'N/A'); ?></td>
+
+                    <!-- Evaluation Badge -->
+                    <td>
+                        <?php
+                        $eval = $row['evaluation_status'];
+                        if ($eval == 'approved') {
+                            echo "<span class='badge green'>Approved</span>";
+                        } elseif ($eval == 'rejected') {
+                            echo "<span class='badge red'>Rejected</span>";
+                        } else {
+                            echo "<span class='badge yellow'>Pending</span>";
+                        }
+                        ?>
+                    </td>
+
+                    <!-- Active Status -->
+                    <td>
+                        <?php if ($row['active_status'] == 1): ?>
+                            <span class="badge green">Active</span>
+                        <?php else: ?>
+                            <span class="badge red">Inactive</span>
+                        <?php endif; ?>
+                    </td>
+
+                    <td><?= $row['height_cm'] ? $row['height_cm'] . ' cm' : 'N/A'; ?></td>
+                    <td><?= $row['weight_kg'] ? $row['weight_kg'] . ' kg' : 'N/A'; ?></td>
+                    <td><?= htmlspecialchars($row['blood_type'] ?? 'N/A'); ?></td>
+                    <td><?= htmlspecialchars($row['ethnicity'] ?? 'N/A'); ?></td>
+
+                    <!-- Account Status Badge -->
+                    <td>
+                        <?php
+                        if ($row['status'] == 'active') {
+                            echo "<span class='badge green'>Active</span>";
+                        } elseif ($row['status'] == 'inactive') {
+                            echo "<span class='badge red'>Inactive</span>";
+                        } else {
+                            echo "<span class='badge yellow'>Pending</span>";
+                        }
+                        ?>
+                    </td>
+
                     <td>
                         <a href="AdminDonorUpdate.php?id=<?= $row['donor_id']; ?>" class="action-btn edit-btn">Edit</a>
                         <a href="AdminDonorDelete.php?id=<?= $row['donor_id']; ?>" 
@@ -120,10 +204,11 @@ img {
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="6">No donor records found.</td>
+                <td colspan="13">No donor records found.</td>
             </tr>
         <?php endif; ?>
     </table>
+
 </div>
 
 <?php include('../../../includes/footer.php'); ?>

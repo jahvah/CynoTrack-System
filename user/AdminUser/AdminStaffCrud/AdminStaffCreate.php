@@ -9,6 +9,7 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
 }
 ?>
 
+<!--style toh para notif ng success or hindi-->
 <style>
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
@@ -32,7 +33,6 @@ button {
 <div class="container">
     <h2>Add New Staff</h2>
 
-    <!-- Display messages -->
     <?php if (isset($_SESSION['error'])): ?>
         <div class="message error"><?= $_SESSION['error']; ?></div>
         <?php unset($_SESSION['error']); ?>

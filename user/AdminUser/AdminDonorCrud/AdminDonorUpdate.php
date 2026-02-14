@@ -16,9 +16,11 @@ if (!isset($_GET['id'])) {
 
 $donor_id = intval($_GET['id']);
 
-/* Fetch donor + account info */
+// fetch donor + account info
 $stmt = $conn->prepare("
-    SELECT d.donor_id, d.account_id, d.first_name, d.last_name, d.profile_image, a.username, a.status
+    SELECT d.donor_id, d.account_id, d.first_name, d.last_name, d.profile_image, d.medical_history, d.evaluation_status, d.active_status, d.height_cm, d.weight_kg, d.eye_color, d.hair_color, d.blood_type, d.ethnicity,
+    a.username, a.email, a.status
+
     FROM donors_users d
     JOIN accounts a ON d.account_id = a.account_id
     WHERE d.donor_id = ?
@@ -35,6 +37,8 @@ if ($result->num_rows === 0) {
 $donor = $result->fetch_assoc();
 ?>
 
+
+<!--style toh para notif ng success or hindi-->
 <style>
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
@@ -52,21 +56,37 @@ img {
     border-radius: 8px;
     display: block;
 }
+.error { background:#f8d7da; color:#721c24; }
+.success { background:#d4edda; color:#155724; }
+
 </style>
 
 <div class="container">
     <h2>Update Donor</h2>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="message error"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
 
     <form action="AdminDonorStore.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action" value="AdminDonorUpdate">
         <input type="hidden" name="donor_id" value="<?= $donor['donor_id']; ?>">
         <input type="hidden" name="account_id" value="<?= $donor['account_id']; ?>">
 
-        <!-- Username (locked) -->
+        <!--ipapakita lang ang username at email, hindi pwedeng baguhin-->
         <label>Username</label>
         <input type="text" value="<?= htmlspecialchars($donor['username']); ?>" class="locked" disabled>
 
-        <!-- Current Profile Picture -->
+        <!--ipapakita lang ang username at email, hindi pwedeng baguhin-->
+        <label>Email</label>
+        <input type="text" value="<?= htmlspecialchars($donor['email']); ?>" class="locked" disabled>
+
         <label>Current Profile Image</label>
         <?php if (!empty($donor['profile_image'])): ?>
             <img src="../../../uploads/<?= htmlspecialchars($donor['profile_image']); ?>" alt="Profile Image">
@@ -74,7 +94,7 @@ img {
             <p>No image uploaded</p>
         <?php endif; ?>
 
-        <!-- Empty fields to update -->
+        <!--fields to update-->
         <label>New First Name</label>
         <input type="text" name="first_name" placeholder="Enter new first name">
 
@@ -84,8 +104,42 @@ img {
         <label>Change Profile Image</label>
         <input type="file" name="profile_image">
 
-        <!-- New Account Status -->
-        <label>Account Status</label>
+        <label>New Medical History</label>
+        <input type="text" name="medical_history" placeholder="Enter new medical history">
+
+        <label>New Evaluation Status</label>
+        <select name="evaluation_status_select">
+            <option value="pending" <?= $donor['evaluation_status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
+            <option value="approved" <?= $donor['evaluation_status'] === 'approved' ? 'selected' : ''; ?>>Approved</option>
+            <option value="rejected" <?= $donor['evaluation_status'] === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
+        </select>
+
+        <label>New Active Status</label>
+        <select name="active_status_select">
+            <option value="1" <?= $donor['active_status'] == 1 ? 'selected' : ''; ?>>Active</option>
+            <option value="0" <?= $donor['active_status'] == 0 ? 'selected' : ''; ?>>Inactive</option>
+        </select>   
+
+         <label>New Height (cm)</label>
+        <input type="number" name="height_cm" min="50" max="250" placeholder="Enter new height in cm"> 
+
+        <label>New Weight (kg)</label>
+        <input type="number" name="weight_kg" min="20" max="200" placeholder="Enter new weight in kg">
+
+        <label>New Eye Color</label>
+        <input type="text" name="eye_color" placeholder="Enter new eye color">
+
+        <label>New Hair Color</label>
+        <input type="text" name="hair_color" placeholder="Enter new hair color">
+
+        <label>New Blood Type</label>
+        <input type="text" name="blood_type" placeholder="Enter new blood type">
+        <label>
+
+        <label>New Ethnicity</label>
+        <input type="text" name="ethnicity" placeholder="Enter new ethnicity">
+        <label>
+
         <select name="status">
             <option value="active" <?= $donor['status'] === 'active' ? 'selected' : ''; ?>>Active</option>
             <option value="inactive" <?= $donor['status'] === 'inactive' ? 'selected' : ''; ?>>Inactive</option>

@@ -3,8 +3,9 @@ session_start();
 include('../../../includes/config.php');
 include('../../../includes/header.php');
 
+// admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../../unauthorized.php");
+    header("Location: ../../../unauthorized.php");
     exit();
 }
 
@@ -15,9 +16,9 @@ if (!isset($_GET['id'])) {
 
 $staff_id = intval($_GET['id']);
 
-/* Fetch staff + account info */
+// fetch staff data with account info
 $stmt = $conn->prepare("
-    SELECT s.staff_id, s.account_id, s.first_name, s.last_name, s.profile_image, a.username, a.status
+    SELECT s.staff_id, s.account_id, s.first_name, s.last_name, s.profile_image, a.username, a.email, a.status
     FROM staff s
     JOIN accounts a ON s.account_id = a.account_id
     WHERE s.staff_id = ?
@@ -34,6 +35,7 @@ if ($result->num_rows === 0) {
 $staff = $result->fetch_assoc();
 ?>
 
+<!--style toh para notif ng success or hindi-->
 <style>
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
@@ -55,12 +57,12 @@ img { width: 120px; border-radius: 8px; display: block; }
 }
 .error { background:#f8d7da; color:#721c24; }
 .success { background:#d4edda; color:#155724; }
+
 </style>
 
 <div class="container">
     <h2>Update Staff</h2>
 
-    <!-- Display messages -->
     <?php if (isset($_SESSION['error'])): ?>
         <div class="message error"><?= $_SESSION['error']; ?></div>
         <?php unset($_SESSION['error']); ?>
@@ -76,21 +78,19 @@ img { width: 120px; border-radius: 8px; display: block; }
         <input type="hidden" name="staff_id" value="<?= $staff['staff_id']; ?>">
         <input type="hidden" name="account_id" value="<?= $staff['account_id']; ?>">
 
-        <!-- Username (locked) -->
+        <!--ipapakita lang ang username at email, hindi pwedeng baguhin-->
         <label>Username</label>
         <input type="text" value="<?= htmlspecialchars($staff['username']); ?>" class="locked" disabled>
+        <!--ipapakita lang ang username at email, hindi pwedeng baguhin-->
+        <label>Email</label>
+        <input type="text" value="<?= htmlspecialchars($staff['email']); ?>" class="locked" disabled>
 
-        <!-- Current Profile Picture -->
         <label>Current Profile Image</label>
         <?php if (!empty($staff['profile_image'])): ?>
-            <img src="../../uploads/<?= htmlspecialchars($staff['profile_image']); ?>" alt="Profile Image">
+            <img src="../../../uploads/<?= htmlspecialchars($staff['profile_image']); ?>" alt="Profile Image">
         <?php else: ?>
             <p>No image uploaded</p>
         <?php endif; ?>
-
-        <!-- Fields to update -->
-        <label>New Email</label>
-        <input type="email" name="email" placeholder="Enter new email">
 
         <label>New First Name</label>
         <input type="text" name="first_name" placeholder="Enter new first name">
@@ -101,7 +101,6 @@ img { width: 120px; border-radius: 8px; display: block; }
         <label>Change Profile Image</label>
         <input type="file" name="profile_image">
 
-        <!-- New Status -->
         <label>Account Status</label>
         <select name="status">
             <option value="active" <?= $staff['status'] === 'active' ? 'selected' : ''; ?>>Active</option>

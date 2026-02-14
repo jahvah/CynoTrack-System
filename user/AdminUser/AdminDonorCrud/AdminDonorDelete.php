@@ -4,7 +4,7 @@ include('../../../includes/config.php');
 
 // Admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../../unauthorized.php");
+    header("Location: ../../../unauthorized.php");
     exit();
 }
 
@@ -16,9 +16,7 @@ if (!isset($_GET['id'])) {
 
 $donor_id = intval($_GET['id']);
 
-/* =========================
-   GET ACCOUNT ID + IMAGE
-========================= */
+//get account id and image
 $stmt = $conn->prepare("SELECT account_id, profile_image FROM donors_users WHERE donor_id=?");
 $stmt->bind_param("i", $donor_id);
 $stmt->execute();
@@ -33,27 +31,21 @@ $data = $result->fetch_assoc();
 $account_id = $data['account_id'];
 $image = $data['profile_image'];
 
-/* =========================
-   DELETE DONOR RECORD
-========================= */
+//delete donor
 $stmt = $conn->prepare("DELETE FROM donors_users WHERE donor_id=?");
 $stmt->bind_param("i", $donor_id);
 if (!$stmt->execute()) {
     die("Donor delete error: " . $stmt->error);
 }
 
-/* =========================
-   DELETE ACCOUNT RECORD
-========================= */
+//delete acount donor
 $stmt = $conn->prepare("DELETE FROM accounts WHERE account_id=?");
 $stmt->bind_param("i", $account_id);
 if (!$stmt->execute()) {
     die("Account delete error: " . $stmt->error);
 }
 
-/* =========================
-   DELETE PROFILE IMAGE FILE
-========================= */
+//delete profile file
 if (!empty($image) && file_exists("../../../uploads/" . $image)) {
     unlink("../../../uploads/" . $image);
 }
