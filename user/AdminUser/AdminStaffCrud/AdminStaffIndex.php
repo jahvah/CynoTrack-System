@@ -11,10 +11,19 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
 }
 
 //fetch staff data including account status
-$query = "SELECT s.staff_id, s.first_name, s.last_name, s.profile_image, a.email, a.status
+$query = "SELECT 
+            s.staff_id, 
+            s.account_id,
+            s.first_name, 
+            s.last_name, 
+            s.profile_image, 
+            a.username,
+            a.email, 
+            a.status
           FROM staff s
           JOIN accounts a ON s.account_id = a.account_id
           ORDER BY s.staff_id DESC";
+
 
 $result = mysqli_query($conn, $query);
 ?>
@@ -85,6 +94,7 @@ img {
             <th>ID</th>
             <th>Profile</th>
             <th>Full Name</th>
+            <th>Username</th>
             <th>Email</th>
             <th>Status</th> <!-- NEW STATUS COLUMN -->
             <th>Actions</th>
@@ -104,6 +114,7 @@ img {
                     </td>
 
                     <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
+                    <td><?= htmlspecialchars($row['username']); ?></td>
                     <td><?= htmlspecialchars($row['email']); ?></td>
                     <td><?= ucfirst(htmlspecialchars($row['status'])); ?></td> <!-- SHOW STATUS -->
 
@@ -120,7 +131,7 @@ img {
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="6">No staff records found.</td>
+                <td colspan="7">No staff records found.</td>
             </tr>
         <?php endif; ?>
     </table>

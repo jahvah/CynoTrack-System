@@ -75,7 +75,7 @@ button {
             <option value="rejected">Rejected</option>
         </select>
 
-        <label>Active Status</label>
+        <label>Account Status</label>
         <select name="active_status" required>
             <option value="1" selected>Active</option>
             <option value="0">Inactive</option>

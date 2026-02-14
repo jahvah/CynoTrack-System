@@ -13,6 +13,7 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
 // fetch donor data including account + donor details
 $query = "SELECT 
             d.donor_id, 
+            d.account_id,
             d.first_name, 
             d.last_name, 
             d.profile_image,
@@ -23,6 +24,7 @@ $query = "SELECT
             d.weight_kg,
             d.blood_type,
             d.ethnicity,
+            a.username,
             a.email, 
             a.status
           FROM donors_users d
@@ -101,15 +103,6 @@ img {
 
 <div class="container">
 
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success"><?= $_SESSION['success']; ?></div>
-        <?php unset($_SESSION['success']); ?>
-    <?php endif; ?>
-
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger"><?= $_SESSION['error']; ?></div>
-        <?php unset($_SESSION['error']); ?>
-    <?php endif; ?>
 
     <div class="top-bar">
         <h2>Donor Management</h2>
@@ -121,6 +114,7 @@ img {
             <th>ID</th>
             <th>Profile</th>
             <th>Full Name</th>
+            <th>Username</th>
             <th>Email</th>
             <th>Medical History</th>
             <th>Evaluation</th>
@@ -148,7 +142,7 @@ img {
 
                     <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
                     <td><?= htmlspecialchars($row['email']); ?></td>
-
+                    <td><?= htmlspecialchars($row['username']); ?></td>
                     <td><?= htmlspecialchars($row['medical_history'] ?? 'N/A'); ?></td>
 
                     <!-- Evaluation Badge -->
@@ -204,7 +198,7 @@ img {
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="13">No donor records found.</td>
+                <td colspan="14">No donor records found.</td>
             </tr>
         <?php endif; ?>
     </table>

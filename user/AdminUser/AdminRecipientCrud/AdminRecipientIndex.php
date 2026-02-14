@@ -10,11 +10,22 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-// fetch recipient data including account status
-$query = "SELECT r.recipient_id, r.first_name, r.last_name, r.profile_image, a.email, a.status
+// fetch recipient data including preferences
+$query = "SELECT 
+            r.recipient_id, 
+            r.account_id,
+            r.first_name, 
+            r.last_name, 
+            r.profile_image, 
+            r.preferences,
+            a.username,
+            a.email, 
+            a.status
           FROM recipients_users r
           JOIN accounts a ON r.account_id = a.account_id
           ORDER BY r.recipient_id DESC";
+
+
 
 $result = mysqli_query($conn, $query);
 ?>
@@ -76,7 +87,6 @@ img {
 
     <div class="top-bar">
         <h2>Recipient Management</h2>
-        <!-- CREATE BUTTON -->
         <a href="AdminRecipientCreate.php" class="create-btn">+ Add Recipient</a>
     </div>
 
@@ -85,7 +95,9 @@ img {
             <th>ID</th>
             <th>Profile</th>
             <th>Full Name</th>
+            <th>Username</th>
             <th>Email</th>
+            <th>Preferences</th>
             <th>Status</th>
             <th>Actions</th>
         </tr>
@@ -105,6 +117,15 @@ img {
 
                     <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
                     <td><?= htmlspecialchars($row['email']); ?></td>
+                    <td><?= htmlspecialchars($row['username']); ?></td>
+
+                    <!-- DISPLAY PREFERENCES -->
+                    <td>
+                        <?= !empty($row['preferences']) 
+                            ? htmlspecialchars($row['preferences']) 
+                            : 'N/A'; ?>
+                    </td>
+
                     <td><?= ucfirst(htmlspecialchars($row['status'])); ?></td>
 
                     <td>
@@ -119,7 +140,7 @@ img {
             <?php endwhile; ?>
         <?php else: ?>
             <tr>
-                <td colspan="6">No recipient records found.</td>
+                <td colspan="8">No recipient records found.</td>
             </tr>
         <?php endif; ?>
     </table>

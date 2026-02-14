@@ -61,7 +61,7 @@ button {
         <label>Last Name</label>
         <input type="text" name="last_name" required>
 
-        <label>Status</label>
+        <label>Account Status</label>
         <select name="status" required>
             <option value="active" selected>Active</option>
             <option value="inactive">Inactive</option>

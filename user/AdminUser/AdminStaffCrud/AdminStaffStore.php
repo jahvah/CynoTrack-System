@@ -2,9 +2,7 @@
 session_start();
 include('../../../includes/config.php');
 
-/* ==============================
-   ADMIN PROTECTION
-============================== */
+//admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../../../unauthorized.php");
     exit();
@@ -15,9 +13,8 @@ if (!isset($_POST['action'])) {
     exit();
 }
 
-/* =====================================================
-   🟢 CREATE STAFF (EMAIL ALLOWED HERE)
-===================================================== */
+//create staff
+
 if ($_POST['action'] === 'AdminStaffStore') {
 
     $username   = trim($_POST['username']);
@@ -90,9 +87,7 @@ if ($_POST['action'] === 'AdminStaffStore') {
     exit();
 }
 
-/* =====================================================
-   🟡 UPDATE STAFF (EMAIL LOCKED)
-===================================================== */
+//update staff
 if ($_POST['action'] === 'AdminStaffUpdate') {
 
     $staff_id   = intval($_POST['staff_id']);
