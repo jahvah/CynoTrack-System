@@ -18,7 +18,13 @@ $staff_id = intval($_GET['id']);
 
 // fetch staff data with account info
 $stmt = $conn->prepare("
-    SELECT s.staff_id, s.account_id, s.first_name, s.last_name, s.profile_image, a.username, a.email, a.status
+    SELECT s.staff_id,
+    s.account_id,
+    s.first_name, s.last_name,
+    s.profile_image,
+    a.username,
+    a.email,
+    a.status
     FROM staff s
     JOIN accounts a ON s.account_id = a.account_id
     WHERE s.staff_id = ?

@@ -14,7 +14,6 @@ if (!isset($_POST['action'])) {
 }
 
 //create staff
-
 if ($_POST['action'] === 'AdminStaffStore') {
 
     $username   = trim($_POST['username']);
@@ -23,7 +22,6 @@ if ($_POST['action'] === 'AdminStaffStore') {
     $first_name = trim($_POST['first_name']);
     $last_name  = trim($_POST['last_name']);
     $status     = $_POST['status'] ?? 'active';
-
 
     //PROFILE IMAGE
     $image_name = null;

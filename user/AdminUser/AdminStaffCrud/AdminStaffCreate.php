@@ -3,6 +3,7 @@ session_start();
 include('../../../includes/config.php');
 include('../../../includes/header.php');
 
+// Admin access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../../../unauthorized.php");
     exit();

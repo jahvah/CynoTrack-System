@@ -14,7 +14,6 @@ if (!isset($_GET['id'])) {
 
 $staff_id = intval($_GET['id']);
 
-
 //get account id and image
 $stmt = $conn->prepare("SELECT account_id, profile_image FROM staff WHERE staff_id=?");
 $stmt->bind_param("i", $staff_id);

@@ -96,7 +96,7 @@ img {
             <th>Full Name</th>
             <th>Username</th>
             <th>Email</th>
-            <th>Status</th> <!-- NEW STATUS COLUMN -->
+            <th>Status</th>
             <th>Actions</th>
         </tr>
 

@@ -10,20 +10,39 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'admin') {
 }
 ?>
 
+<!--style toh para notif ng success or hindi-->
 <style>
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
-input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; }
+input, select { width: 100%; padding: 10px; margin: 10px 0; }
 button {
     padding: 10px 15px;
     background: green;
     color: white;
     border: none;
+    cursor: pointer;
 }
+.message {
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+.error { background:#f8d7da; color:#721c24; }
+.success { background:#d4edda; color:#155724; }
 </style>
 
 <div class="container">
     <h2>Add New Self-Storage User</h2>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="message error"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
 
     <form action="AdminSelfStorageStore.php" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="action" value="AdminSelfStorageStore">
