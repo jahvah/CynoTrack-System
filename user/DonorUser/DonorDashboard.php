@@ -16,7 +16,7 @@ if (!$account_id) {
     exit;
 }
 
-// Fetch donor profile and account status
+// Fetch donor profile  and account status
 $stmt = $conn->prepare("
     SELECT d.*, a.status AS account_status
     FROM donors_users d
@@ -25,7 +25,17 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param("i", $account_id);
 $stmt->execute();
-$donor = $stmt->get_result()->fetch_assoc();
+$result = $stmt->get_result();
+
+// ✅ Check if account does not exist
+if ($result->num_rows === 0) {
+    $_SESSION['flash_message'] = "Account does not exist. Please contact admin.";
+    unset($_SESSION['account_id'], $_SESSION['role'], $_SESSION['role_user_id']);
+    header("Location: ../login.php");
+    exit;
+}
+
+$donor = $result->fetch_assoc();
 
 // Check if account is inactive or pending
 if ($donor['account_status'] !== 'active') {
@@ -38,6 +48,8 @@ if ($donor['account_status'] !== 'active') {
     header("Location: ../login.php");
     exit;
 }
+?>
+
 ?>
 
 <div class="container mt-5">

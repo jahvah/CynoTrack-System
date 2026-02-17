@@ -13,10 +13,7 @@ if (!isset($_POST['action'])) {
 
 $action = $_POST['action'];
 
-
-/* =========================
-   UPDATE PROFILE
-========================= */
+//update profile
 if ($action === 'update_profile') {
 
     if (!isset($_SESSION['account_id'])) {
@@ -36,7 +33,6 @@ if ($action === 'update_profile') {
     $types  = "";
     $values = [];
 
-    // Helper function to add fields dynamically
     function addField(&$fields, &$types, &$values, $name, $value, $type) {
         if ($value !== "" && $value !== null) {
             $fields[] = "$name=?";

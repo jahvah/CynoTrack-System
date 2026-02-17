@@ -95,8 +95,8 @@ img {
             <th>ID</th>
             <th>Profile</th>
             <th>Full Name</th>
-            <th>Username</th>
             <th>Email</th>
+            <th>Username</th>
             <th>Preferences</th>
             <th>Status</th>
             <th>Actions</th>

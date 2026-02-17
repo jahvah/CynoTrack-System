@@ -1,7 +1,7 @@
 <?php
 session_start();
-include("../../includes/config.php");
 
+include("../../includes/config.php");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -13,9 +13,7 @@ if (!isset($_POST['action'])) {
 
 $action = $_POST['action'];
 
-// =======================================================
-// COMPLETE PROFILE / UPDATE PROFILE
-// =======================================================
+//update profile
 if ($action === 'update_profile') {
 
     if (!isset($_SESSION['account_id'])) {
@@ -25,8 +23,8 @@ if ($action === 'update_profile') {
 
     $account_id = $_SESSION['account_id'];
 
-    // Fetch recipient
-    $stmt = $conn->prepare("SELECT recipient_id FROM recipients_users WHERE account_id=?");
+    // Get recipient data
+    $stmt = $conn->prepare("SELECT * FROM recipients_users WHERE account_id=?");
     $stmt->bind_param("i", $account_id);
     $stmt->execute();
     $recipient = $stmt->get_result()->fetch_assoc();
@@ -35,6 +33,7 @@ if ($action === 'update_profile') {
     $types  = "";
     $values = [];
 
+  
     function addField(&$fields, &$types, &$values, $name, $value, $type) {
         if ($value !== "" && $value !== null) {
             $fields[] = "$name=?";
@@ -47,13 +46,14 @@ if ($action === 'update_profile') {
     addField($fields, $types, $values, "last_name", trim($_POST['last_name']), "s");
     addField($fields, $types, $values, "preferences", trim($_POST['preferences']), "s");
 
-    // IMAGE UPLOAD
+    // Handle profile image (same validation as donor)
     if (!empty($_FILES['profile_image']['name'])) {
+
         $upload_dir = "../../uploads/";
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 
         $ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+        $allowed = ['jpg','jpeg','png','gif'];
 
         if (!in_array($ext, $allowed)) {
             header("Location: RecipientEditProfile.php?error=Invalid image type");
@@ -66,6 +66,7 @@ if ($action === 'update_profile') {
         }
 
         $file_name = uniqid("recipient_", true).".".$ext;
+
         if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_dir.$file_name)) {
             addField($fields, $types, $values, "profile_image", $file_name, "s");
         }
@@ -84,9 +85,30 @@ if ($action === 'update_profile') {
     $stmt->bind_param($types, ...$values);
 
     if ($stmt->execute()) {
-        header("Location: RecipientDashboard.php?profile_updated=1");
+
+        // First-time completion check
+        $first_time = empty($recipient['profile_image']);
+
+        if ($first_time) {
+
+            $_SESSION['flash_message'] = "Your account is pending approval. Please login after admin approval.";
+
+            unset($_SESSION['account_id']);
+            unset($_SESSION['role']);
+
+            header("Location: ../login.php");
+            exit();
+
+        } else {
+
+            $_SESSION['flash_message'] = "Profile updated successfully!";
+            header("Location: RecipientEditProfile.php");
+            exit();
+        }
+
     } else {
         header("Location: RecipientEditProfile.php?error=Update failed");
-    }
-    exit();
+        exit();
+     }
 }
+?>

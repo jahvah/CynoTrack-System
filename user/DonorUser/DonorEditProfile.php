@@ -3,6 +3,7 @@ session_start();
 include("../../includes/header.php");
 include("../../includes/config.php");
 
+//session flash message for success or error
 if (isset($_SESSION['flash_message'])) {
     echo "<div class='alert alert-success'>".htmlspecialchars($_SESSION['flash_message'])."</div>";
     unset($_SESSION['flash_message']);
