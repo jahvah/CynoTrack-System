@@ -1,7 +1,7 @@
 <?php
-session_start();
-include("../../includes/config.php");
+session_start(); // must be first line
 
+include("../../includes/config.php");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -14,7 +14,9 @@ if (!isset($_POST['action'])) {
 $action = $_POST['action'];
 
 
-// COMPLETE PROFILE AND UPADTE PROFILE
+/* =========================
+   UPDATE PROFILE
+========================= */
 if ($action === 'update_profile') {
 
     if (!isset($_SESSION['account_id'])) {
@@ -24,7 +26,8 @@ if ($action === 'update_profile') {
 
     $account_id = $_SESSION['account_id'];
 
-    $stmt = $conn->prepare("SELECT donor_id FROM donors_users WHERE account_id=?");
+    // Get donor data
+    $stmt = $conn->prepare("SELECT * FROM donors_users WHERE account_id=?");
     $stmt->bind_param("i", $account_id);
     $stmt->execute();
     $donor = $stmt->get_result()->fetch_assoc();
@@ -33,6 +36,7 @@ if ($action === 'update_profile') {
     $types  = "";
     $values = [];
 
+    // Helper function to add fields dynamically
     function addField(&$fields, &$types, &$values, $name, $value, $type) {
         if ($value !== "" && $value !== null) {
             $fields[] = "$name=?";
@@ -52,7 +56,7 @@ if ($action === 'update_profile') {
     if ($_POST['height_cm'] !== "") addField($fields,$types,$values,"height_cm",(int)$_POST['height_cm'],"i");
     if ($_POST['weight_kg'] !== "") addField($fields,$types,$values,"weight_kg",(int)$_POST['weight_kg'],"i");
 
-    // IMAGE
+    // Handle profile image
     if (!empty($_FILES['profile_image']['name'])) {
         $upload_dir = "../../uploads/";
         if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
@@ -89,18 +93,37 @@ if ($action === 'update_profile') {
     $stmt->bind_param($types, ...$values);
 
     if ($stmt->execute()) {
-        header("Location: DonorDashboard.php?profile_updated=1");
+
+        // Detect first-time profile completion
+        $first_time = empty($donor['height_cm']) && empty($donor['weight_kg']) && empty($donor['profile_image']);
+
+        if ($first_time) {
+            // First-time completion: log out and redirect to login with message
+            $_SESSION['flash_message'] = "Your account is pending approval. Please login after admin approval.";
+
+            unset($_SESSION['account_id']);
+            unset($_SESSION['role']);
+
+            header("Location: ../login.php");
+            exit();
+        } else {
+            // Normal update: stay on DonorEditProfile.php and show success message
+            $_SESSION['flash_message'] = "Profile updated successfully!";
+            header("Location: DonorEditProfile.php");
+            exit();
+        }
+
     } else {
         header("Location: DonorEditProfile.php?error=Update failed");
+        exit();
     }
-    exit();
 }
 
 
 
-
-// REGISTER DONOR
-
+/* =========================
+   REGISTER DONOR
+========================= */
 if ($action === 'register') {
 
     $username = trim($_POST['username']);
@@ -121,9 +144,10 @@ if ($action === 'register') {
     $stmt2->bind_param("i", $account_id);
     $stmt2->execute();
 
-    $_SESSION['account_id'] = $account_id;
-    $_SESSION['role'] = 'donor';
+    // Set flash message
+    $_SESSION['flash_message'] = "Your account is pending approval. Please login after admin approval.";
 
-    header("Location: DonorProfile.php");
+    // Redirect to login page
+    header("Location: ../login.php");
     exit();
 }

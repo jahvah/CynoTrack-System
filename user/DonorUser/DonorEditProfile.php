@@ -3,10 +3,16 @@ session_start();
 include("../../includes/header.php");
 include("../../includes/config.php");
 
+if (isset($_SESSION['flash_message'])) {
+    echo "<p style='color:green'>".htmlspecialchars($_SESSION['flash_message'])."</p>";
+    unset($_SESSION['flash_message']);
+}
+
 if (!isset($_SESSION['account_id'])) {
     header("Location: ../login.php");
     exit();
 }
+
 
 $account_id = $_SESSION['account_id'];
 
@@ -68,6 +74,7 @@ if (!$donor) {
 
             <button class="btn btn-primary">Update Profile</button>
             <a href="DonorDashboard.php" class="btn btn-secondary">Back</a>
+            
         </form>
     </div>
 </div>

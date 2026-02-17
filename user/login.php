@@ -1,15 +1,34 @@
-<?php include('../includes/header.php'); ?>
-<?php include('../includes/alert.php'); ?>
+<?php 
+session_start(); // MUST be at the very top
+include('../includes/header.php'); 
+include('../includes/alert.php'); 
+?>
 
 <h2>Login</h2>
 
 <?php
-// Optional error messages
+// Show flash message from DonorStore.php (pending, inactive, registration)
+if (isset($_SESSION['flash_message'])) {
+    echo "<p style='color:blue'>".htmlspecialchars($_SESSION['flash_message'])."</p>";
+    unset($_SESSION['flash_message']); // show only once
+}
+
+// Optional GET error messages for login failures
 if(isset($_GET['error'])){
-    if($_GET['error'] == 'invalid_credentials') echo "<p style='color:red'>Invalid email or password</p>";
-    if($_GET['error'] == 'inactive') echo "<p style='color:red'>Account inactive. Contact admin.</p>";
-    if($_GET['error'] == 'pending') echo "<p style='color:red'>Account pending approval.</p>";
-    if($_GET['error'] == 'role_not_found') echo "<p style='color:red'>Role error. Contact admin.</p>";
+    switch($_GET['error']){
+        case 'invalid_credentials':
+            echo "<p style='color:red'>Invalid email or password</p>";
+            break;
+        case 'inactive':
+            echo "<p style='color:red'>Account inactive. Contact admin.</p>";
+            break;
+        case 'pending':
+            echo "<p style='color:red'>Account pending approval.</p>";
+            break;
+        case 'role_not_found':
+            echo "<p style='color:red'>Role error. Contact admin.</p>";
+            break;
+    }
 }
 ?>
 
