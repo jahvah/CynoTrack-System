@@ -75,12 +75,6 @@ button {
             <option value="rejected">Rejected</option>
         </select>
 
-        <label>Account Status</label>
-        <select name="active_status" required>
-            <option value="1" selected>Active</option>
-            <option value="0">Inactive</option>
-        </select>
-
         <label>Height (cm)</label>
         <input type="number" name="height_cm" min="50" max="250">
 

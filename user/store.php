@@ -16,6 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 ======================================= */
 function registerUser($conn, $username, $email, $password, $role_id, $first_name, $last_name) {
 
+    /* 📧 CHECK IF EMAIL IS GMAIL */
+    if (!preg_match("/^[a-zA-Z0-9._%+-]+@gmail\.com$/", $email)) {
+        header("Location: register.php?error=invalid_email");
+        exit;
+    }
+
+
     /* 🔍 CHECK FOR EXISTING USERNAME OR EMAIL */
     $stmt = $conn->prepare("SELECT username, email FROM accounts WHERE username = ? OR email = ?");
     $stmt->bind_param("ss", $username, $email);

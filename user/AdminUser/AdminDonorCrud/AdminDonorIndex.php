@@ -19,17 +19,19 @@ $query = "SELECT
             d.profile_image,
             d.medical_history,
             d.evaluation_status,
-            d.active_status,
             d.height_cm,
             d.weight_kg,
             d.blood_type,
             d.ethnicity,
+            d.eye_color,       -- added
+            d.hair_color,      -- added
             a.username,
             a.email, 
             a.status
           FROM donors_users d
           JOIN accounts a ON d.account_id = a.account_id
           ORDER BY d.donor_id DESC";
+
 
 $result = mysqli_query($conn, $query);
 ?>
@@ -110,98 +112,93 @@ img {
     </div>
 
     <table>
-        <tr>
-            <th>ID</th>
-            <th>Profile</th>
-            <th>Full Name</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Medical History</th>
-            <th>Evaluation</th>
-            <th>Active</th>
-            <th>Height</th>
-            <th>Weight</th>
-            <th>Blood Type</th>
-            <th>Ethnicity</th>
-            <th>Account Status</th>
-            <th>Actions</th>
-        </tr>
+    <tr>
+        <th>ID</th>
+        <th>Profile</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Username</th>
+        <th>Medical History</th>
+        <th>Evaluation</th>
+        <th>Height</th>
+        <th>Weight</th>
+        <th>Eye Color</th>
+        <th>Hair Color</th>
+        <th>Blood Type</th>
+        <th>Ethnicity</th>
+        <th>Account Status</th>
+        <th>Actions</th>
+    </tr>
 
-        <?php if ($result && mysqli_num_rows($result) > 0): ?>
-            <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                <tr>
-                    <td><?= $row['donor_id']; ?></td>
-
-                    <td>
-                        <?php if (!empty($row['profile_image'])): ?>
-                            <img src="../../../uploads/<?= htmlspecialchars($row['profile_image']); ?>">
-                        <?php else: ?>
-                            No Image
-                        <?php endif; ?>
-                    </td>
-
-                    <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
-                    <td><?= htmlspecialchars($row['email']); ?></td>
-                    <td><?= htmlspecialchars($row['username']); ?></td>
-                    <td><?= htmlspecialchars($row['medical_history'] ?? 'N/A'); ?></td>
-
-                    <!-- Evaluation Badge -->
-                    <td>
-                        <?php
-                        $eval = $row['evaluation_status'];
-                        if ($eval == 'approved') {
-                            echo "<span class='badge green'>Approved</span>";
-                        } elseif ($eval == 'rejected') {
-                            echo "<span class='badge red'>Rejected</span>";
-                        } else {
-                            echo "<span class='badge yellow'>Pending</span>";
-                        }
-                        ?>
-                    </td>
-
-                    <!-- Active Status -->
-                    <td>
-                        <?php if ($row['active_status'] == 1): ?>
-                            <span class="badge green">Active</span>
-                        <?php else: ?>
-                            <span class="badge red">Inactive</span>
-                        <?php endif; ?>
-                    </td>
-
-                    <td><?= $row['height_cm'] ? $row['height_cm'] . ' cm' : 'N/A'; ?></td>
-                    <td><?= $row['weight_kg'] ? $row['weight_kg'] . ' kg' : 'N/A'; ?></td>
-                    <td><?= htmlspecialchars($row['blood_type'] ?? 'N/A'); ?></td>
-                    <td><?= htmlspecialchars($row['ethnicity'] ?? 'N/A'); ?></td>
-
-                    <!-- Account Status Badge -->
-                    <td>
-                        <?php
-                        if ($row['status'] == 'active') {
-                            echo "<span class='badge green'>Active</span>";
-                        } elseif ($row['status'] == 'inactive') {
-                            echo "<span class='badge red'>Inactive</span>";
-                        } else {
-                            echo "<span class='badge yellow'>Pending</span>";
-                        }
-                        ?>
-                    </td>
-
-                    <td>
-                        <a href="AdminDonorUpdate.php?id=<?= $row['donor_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="AdminDonorDelete.php?id=<?= $row['donor_id']; ?>" 
-                           class="action-btn delete-btn"
-                           onclick="return confirm('Are you sure you want to delete this donor?');">
-                           Delete
-                        </a>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
+    <?php if ($result && mysqli_num_rows($result) > 0): ?>
+        <?php while ($row = mysqli_fetch_assoc($result)): ?>
             <tr>
-                <td colspan="14">No donor records found.</td>
+                <td><?= $row['donor_id']; ?></td>
+
+                <td>
+                    <?php if (!empty($row['profile_image'])): ?>
+                        <img src="../../../uploads/<?= htmlspecialchars($row['profile_image']); ?>">
+                    <?php else: ?>
+                        No Image
+                    <?php endif; ?>
+                </td>
+
+                <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
+                <td><?= htmlspecialchars($row['email']); ?></td>
+                <td><?= htmlspecialchars($row['username']); ?></td>
+                <td><?= htmlspecialchars($row['medical_history'] ?? 'N/A'); ?></td>
+
+                <!-- Evaluation Badge -->
+                <td>
+                    <?php
+                    $eval = $row['evaluation_status'];
+                    if ($eval == 'approved') {
+                        echo "<span class='badge green'>Approved</span>";
+                    } elseif ($eval == 'rejected') {
+                        echo "<span class='badge red'>Rejected</span>";
+                    } else {
+                        echo "<span class='badge yellow'>Pending</span>";
+                    }
+                    ?>
+                </td>
+
+                <td><?= $row['height_cm'] ? $row['height_cm'] . ' cm' : 'N/A'; ?></td>
+                <td><?= $row['weight_kg'] ? $row['weight_kg'] . ' kg' : 'N/A'; ?></td>
+                <td><?= htmlspecialchars($row['eye_color'] ?? 'N/A'); ?></td>
+                <td><?= htmlspecialchars($row['hair_color'] ?? 'N/A'); ?></td>
+                <td><?= htmlspecialchars($row['blood_type'] ?? 'N/A'); ?></td>
+                <td><?= htmlspecialchars($row['ethnicity'] ?? 'N/A'); ?></td>
+
+                <!-- Account Status Badge -->
+                <td>
+                    <?php
+                    if ($row['status'] == 'active') {
+                        echo "<span class='badge green'>Active</span>";
+                    } elseif ($row['status'] == 'inactive') {
+                        echo "<span class='badge red'>Inactive</span>";
+                    } else {
+                        echo "<span class='badge yellow'>Pending</span>";
+                    }
+                    ?>
+                </td>
+
+                <td>
+                    <a href="AdminDonorUpdate.php?id=<?= $row['donor_id']; ?>" class="action-btn edit-btn">Edit</a>
+                    <a href="AdminDonorDelete.php?id=<?= $row['donor_id']; ?>" 
+                       class="action-btn delete-btn"
+                       onclick="return confirm('Are you sure you want to delete this donor?');">
+                       Delete
+                    </a>
+                </td>
             </tr>
-        <?php endif; ?>
-    </table>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <tr>
+            <td colspan="15">No donor records found.</td>
+        </tr>
+    <?php endif; ?>
+</table>
+
 
 </div>
 

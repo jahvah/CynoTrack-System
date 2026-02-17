@@ -90,35 +90,3 @@ if ($action === 'update_profile') {
     }
     exit();
 }
-
-// =======================================================
-// REGISTER RECIPIENT
-// =======================================================
-if ($action === 'register') {
-
-    $username = trim($_POST['username']);
-    $email    = trim($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-
-    $stmt = $conn->prepare("
-        INSERT INTO accounts (username, email, password_hash, role_id)
-        VALUES (?, ?, ?, (SELECT role_id FROM roles WHERE role_name='Recipient'))
-    ");
-    $stmt->bind_param("sss", $username, $email, $password);
-    $stmt->execute();
-
-    $account_id = $stmt->insert_id;
-
-    // Create empty recipient profile row
-    $stmt2 = $conn->prepare("INSERT INTO recipients_users (account_id) VALUES (?)");
-    $stmt2->bind_param("i", $account_id);
-    $stmt2->execute();
-
-    $_SESSION['account_id'] = $account_id;
-    $_SESSION['role'] = 'recipient';
-    $_SESSION['role_user_id'] = $conn->insert_id;
-
-    // Redirect to complete profile
-    header("Location: RecipientProfile.php");
-    exit();
-}

@@ -4,7 +4,7 @@ include("../../includes/header.php");
 include("../../includes/config.php");
 
 if (isset($_SESSION['flash_message'])) {
-    echo "<p style='color:green'>".htmlspecialchars($_SESSION['flash_message'])."</p>";
+    echo "<div class='alert alert-success'>".htmlspecialchars($_SESSION['flash_message'])."</div>";
     unset($_SESSION['flash_message']);
 }
 
@@ -12,7 +12,6 @@ if (!isset($_SESSION['account_id'])) {
     header("Location: ../login.php");
     exit();
 }
-
 
 $account_id = $_SESSION['account_id'];
 
@@ -28,54 +27,85 @@ if (!$donor) {
 ?>
 
 <div class="container mt-5">
-    <h2>Edit Donor Profile</h2>
-
-    <?php if (isset($_GET['updated'])): ?>
-        <div class="alert alert-success">Profile updated successfully!</div>
-    <?php endif; ?>
-
-    <?php if (isset($_GET['error'])): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($_GET['error']) ?></div>
-    <?php endif; ?>
-
-    <div class="card p-4 shadow-sm" style="max-width:700px">
-        <form method="POST" enctype="multipart/form-data" action="DonorStore.php">
-
-            <input type="hidden" name="action" value="update_profile">
-
-            <!-- Profile Image -->
-            <div class="text-center mb-3">
-                <img src="<?= !empty($donor['profile_image']) 
-                    ? '../../uploads/'.$donor['profile_image'] 
-                    : '../../uploads/default.png' ?>"
-                    class="rounded-circle mb-2" width="120" height="120">
-                <input type="file" name="profile_image" class="form-control mt-2">
-            </div>
-
-            <!-- EMPTY INPUTS (PARTIAL UPDATE) -->
-            <input type="text" name="first_name" class="form-control mb-2" placeholder="First Name">
-            <input type="text" name="last_name" class="form-control mb-2" placeholder="Last Name">
-
-            <textarea name="medical_history" class="form-control mb-2" placeholder="Medical History"></textarea>
-
-            <div class="row">
-                <div class="col">
-                    <input type="number" name="height_cm" class="form-control mb-2" placeholder="Height (cm)">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Edit Donor Profile</h3>
                 </div>
-                <div class="col">
-                    <input type="number" name="weight_kg" class="form-control mb-2" placeholder="Weight (kg)">
+                <div class="card-body">
+
+                    <?php if (isset($_GET['updated'])): ?>
+                        <div class="alert alert-success">Profile updated successfully!</div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_GET['error'])): ?>
+                        <div class="alert alert-danger"><?= htmlspecialchars($_GET['error']) ?></div>
+                    <?php endif; ?>
+
+                    <form method="POST" enctype="multipart/form-data" action="DonorStore.php">
+                        <input type="hidden" name="action" value="update_profile">
+
+                        <!-- Profile Image -->
+                        <div class="text-center mb-4">
+                            <img src="<?= !empty($donor['profile_image']) 
+                                ? '../../uploads/'.$donor['profile_image'] 
+                                : '../../uploads/default.png' ?>"
+                                class="rounded-circle border border-secondary mb-2"
+                                width="140" height="140"
+                                style="object-fit: cover;">
+                            <input type="file" name="profile_image" class="form-control mt-2">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <input type="text" name="first_name" class="form-control" placeholder="First Name">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="last_name" class="form-control" placeholder="Last Name">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <textarea name="medical_history" class="form-control" rows="3" placeholder="Medical History"></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <input type="number" name="height_cm" class="form-control" placeholder="Height (cm)">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="number" name="weight_kg" class="form-control" placeholder="Weight (kg)">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <input type="text" name="eye_color" class="form-control" placeholder="Eye Color">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="hair_color" class="form-control" placeholder="Hair Color">
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <input type="text" name="blood_type" class="form-control" placeholder="Blood Type">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="ethnicity" class="form-control" placeholder="Ethnicity">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-primary"><i class="bi bi-check-circle"></i> Update Profile</button>
+                            <a href="DonorDashboard.php" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Back</a>
+                        </div>
+
+                    </form>
                 </div>
             </div>
-
-            <input type="text" name="eye_color" class="form-control mb-2" placeholder="Eye Color">
-            <input type="text" name="hair_color" class="form-control mb-2" placeholder="Hair Color">
-            <input type="text" name="blood_type" class="form-control mb-2" placeholder="Blood Type">
-            <input type="text" name="ethnicity" class="form-control mb-3" placeholder="Ethnicity">
-
-            <button class="btn btn-primary">Update Profile</button>
-            <a href="DonorDashboard.php" class="btn btn-secondary">Back</a>
-            
-        </form>
+        </div>
     </div>
 </div>
 

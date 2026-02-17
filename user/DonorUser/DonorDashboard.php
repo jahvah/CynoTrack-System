@@ -34,63 +34,58 @@ if ($donor['account_status'] !== 'active') {
     } elseif ($donor['account_status'] === 'pending') {
         $_SESSION['flash_message'] = "Your account is pending approval. Please wait for admin approval.";
     }
-    // Log out donor
     unset($_SESSION['account_id'], $_SESSION['role'], $_SESSION['role_user_id']);
     header("Location: ../login.php");
     exit;
 }
-
-// Now you can safely show the dashboard for active accounts
 ?>
 
-
-<div class="container">
-    <h2>Welcome, <?= htmlspecialchars($donor['first_name']); ?>!</h2>
-
-    <!-- DONOR PROFILE -->
-    <section>
-        <h3>Your Profile</h3>
-
-        <a href="DonorEditProfile.php" class="btn btn-primary" style="margin-bottom:10px;">
-            Edit Profile
-        </a>
-
-        <!-- PROFILE IMAGE -->
-        <div style="margin-bottom:15px;">
-            <?php if (!empty($donor['profile_image'])): ?>
-                <img src="../../uploads/<?= htmlspecialchars($donor['profile_image']); ?>"
-                     alt="Profile Image"
-                     width="150"
-                     height="150"
-                     style="object-fit:cover;border-radius:50%;border:1px solid #ccc;">
-            <?php else: ?>
-                <p><em>No profile image uploaded.</em></p>
-            <?php endif; ?>
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Welcome, <?= htmlspecialchars($donor['first_name']); ?>!</h2>
         </div>
+        <div class="card-body">
+            <!-- Edit Profile Button -->
+            <div class="mb-4">
+                <a href="DonorEditProfile.php" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil-square"></i> Edit Profile
+                </a>
+            </div>
 
-        <p><strong>Full Name:</strong>
-            <?= htmlspecialchars($donor['first_name'] . " " . $donor['last_name']); ?>
-        </p>
+            <div class="row">
+                <!-- Profile Image -->
+                <div class="col-md-4 text-center mb-4">
+                    <?php if (!empty($donor['profile_image'])): ?>
+                        <img src="../../uploads/<?= htmlspecialchars($donor['profile_image']); ?>"
+                             alt="Profile Image"
+                             class="img-fluid rounded-circle border border-secondary"
+                             style="width:180px; height:180px; object-fit:cover;">
+                    <?php else: ?>
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:180px; height:180px; border:1px solid #ccc;">
+                            <em>No image</em>
+                        </div>
+                    <?php endif; ?>
+                </div>
 
-        <p><strong>Height:</strong> <?= htmlspecialchars($donor['height_cm'] ?? 'N/A'); ?> cm</p>
-        <p><strong>Weight:</strong> <?= htmlspecialchars($donor['weight_kg'] ?? 'N/A'); ?> kg</p>
-        <p><strong>Eye Color:</strong> <?= htmlspecialchars($donor['eye_color'] ?? 'N/A'); ?></p>
-        <p><strong>Hair Color:</strong> <?= htmlspecialchars($donor['hair_color'] ?? 'N/A'); ?></p>
-        <p><strong>Blood Type:</strong> <?= htmlspecialchars($donor['blood_type'] ?? 'N/A'); ?></p>
-        <p><strong>Ethnicity:</strong> <?= htmlspecialchars($donor['ethnicity'] ?? 'N/A'); ?></p>
-
-        <p><strong>Medical History:</strong><br>
-            <?= nl2br(htmlspecialchars($donor['medical_history'] ?? 'None')); ?>
-        </p>
-
-        <p><strong>Evaluation Status:</strong>
-            <?= ucfirst($donor['evaluation_status']); ?>
-        </p>
-
-        <p><strong>Active Status:</strong>
-            <?= $donor['active_status'] ? 'Active' : 'Inactive'; ?>
-        </p>
-    </section>
+                <!-- Profile Details -->
+                <div class="col-md-8">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Full Name:</strong> <?= htmlspecialchars($donor['first_name'] . " " . $donor['last_name']); ?></li>
+                        <li class="list-group-item"><strong>Height:</strong> <?= htmlspecialchars($donor['height_cm'] ?? 'N/A'); ?> cm</li>
+                        <li class="list-group-item"><strong>Weight:</strong> <?= htmlspecialchars($donor['weight_kg'] ?? 'N/A'); ?> kg</li>
+                        <li class="list-group-item"><strong>Eye Color:</strong> <?= htmlspecialchars($donor['eye_color'] ?? 'N/A'); ?></li>
+                        <li class="list-group-item"><strong>Hair Color:</strong> <?= htmlspecialchars($donor['hair_color'] ?? 'N/A'); ?></li>
+                        <li class="list-group-item"><strong>Blood Type:</strong> <?= htmlspecialchars($donor['blood_type'] ?? 'N/A'); ?></li>
+                        <li class="list-group-item"><strong>Ethnicity:</strong> <?= htmlspecialchars($donor['ethnicity'] ?? 'N/A'); ?></li>
+                        <li class="list-group-item"><strong>Medical History:</strong><br><?= nl2br(htmlspecialchars($donor['medical_history'] ?? 'None')); ?></li>
+                        <li class="list-group-item"><strong>Evaluation Status:</strong> <?= ucfirst($donor['evaluation_status']); ?></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php include("../../includes/footer.php"); ?>

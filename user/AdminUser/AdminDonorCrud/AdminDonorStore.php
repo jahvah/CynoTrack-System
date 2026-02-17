@@ -25,7 +25,6 @@ if ($_POST['action'] === 'AdminDonorStore') {
     $status           = $_POST['status'] ?? 'active';
     $medical_history  = trim($_POST['medical_history']);
     $evaluation_status= $_POST['evaluation_status'] ?? 'pending'; // can be 'pending', 'approved', 'rejected'
-    $active_status    = isset($_POST['active_status']) ? (int)$_POST['active_status'] : 1;
     $height_cm        = (int)$_POST['height_cm'];
     $weight_kg        = (int)$_POST['weight_kg'];
     $eye_color        = trim($_POST['eye_color']);
@@ -85,19 +84,17 @@ if ($stmtUser->num_rows > 0 && $stmtEmail->num_rows > 0) {
 
     // INSERT DONOR
     $stmt2 = $conn->prepare("
-        INSERT INTO donors_users 
-        (account_id, first_name, last_name, profile_image, medical_history, evaluation_status, active_status, height_cm, weight_kg, eye_color, hair_color, blood_type, ethnicity)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO donors_users (account_id, first_name, last_name, profile_image, medical_history, evaluation_status, height_cm, weight_kg, eye_color, hair_color, blood_type, ethnicity)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     $stmt2->bind_param(
-        "isssssiisssss",
+        "isssssiissss",
         $account_id,
         $first_name,
         $last_name,
         $image_name,
         $medical_history,
         $evaluation_status,
-        $active_status,
         $height_cm,
         $weight_kg,
         $eye_color,
@@ -124,9 +121,6 @@ if ($_POST['action'] === 'AdminDonorUpdate') {
     $evaluation_status = !empty($_POST['evaluation_status_select']) 
                             ? $_POST['evaluation_status_select'] 
                             : trim($_POST['evaluation_status']);
-    $active_status     = isset($_POST['active_status_select']) 
-                            ? intval($_POST['active_status_select']) 
-                            : trim($_POST['active_status']);
     $height_cm   = trim($_POST['height_cm']);
     $weight_kg   = trim($_POST['weight_kg']);
     $eye_color   = trim($_POST['eye_color']);
@@ -143,7 +137,6 @@ if ($_POST['action'] === 'AdminDonorUpdate') {
         $stmt->bind_param("si", $status, $account_id);
         $stmt->execute();
     }
-
 
     //update first name
     if (!empty($first_name)) {
@@ -170,13 +163,6 @@ if ($_POST['action'] === 'AdminDonorUpdate') {
     if (!empty($evaluation_status)) {
         $stmt = $conn->prepare("UPDATE donors_users SET evaluation_status=? WHERE donor_id=?");
         $stmt->bind_param("si", $evaluation_status, $donor_id);
-        $stmt->execute();
-    }
-
-    //update active status
-    if ($active_status !== "") {
-        $stmt = $conn->prepare("UPDATE donors_users SET active_status=? WHERE donor_id=?");
-        $stmt->bind_param("ii", $active_status, $donor_id);
         $stmt->execute();
     }
 

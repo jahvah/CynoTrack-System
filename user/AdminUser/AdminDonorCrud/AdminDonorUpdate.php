@@ -18,7 +18,7 @@ $donor_id = intval($_GET['id']);
 
 // fetch donor + account info
 $stmt = $conn->prepare("
-    SELECT d.donor_id, d.account_id, d.first_name, d.last_name, d.profile_image, d.medical_history, d.evaluation_status, d.active_status, d.height_cm, d.weight_kg, d.eye_color, d.hair_color, d.blood_type, d.ethnicity,
+    SELECT d.donor_id, d.account_id, d.first_name, d.last_name, d.profile_image, d.medical_history, d.evaluation_status, d.height_cm, d.weight_kg, d.eye_color, d.hair_color, d.blood_type, d.ethnicity,
     a.username, a.email, a.status
 
     FROM donors_users d
@@ -113,13 +113,6 @@ img {
             <option value="approved" <?= $donor['evaluation_status'] === 'approved' ? 'selected' : ''; ?>>Approved</option>
             <option value="rejected" <?= $donor['evaluation_status'] === 'rejected' ? 'selected' : ''; ?>>Rejected</option>
         </select>
-
-        <label>New Active Status</label>
-        <select name="active_status_select">
-            <option value="1" <?= $donor['active_status'] == 1 ? 'selected' : ''; ?>>Active</option>
-            <option value="0" <?= $donor['active_status'] == 0 ? 'selected' : ''; ?>>Inactive</option>
-        </select>   
-
          <label>New Height (cm)</label>
         <input type="number" name="height_cm" min="50" max="250" placeholder="Enter new height in cm"> 
 
@@ -140,6 +133,7 @@ img {
         <input type="text" name="ethnicity" placeholder="Enter new ethnicity">
         <label>
 
+        <label>Account Status</label>
         <select name="status">
             <option value="active" <?= $donor['status'] === 'active' ? 'selected' : ''; ?>>Active</option>
             <option value="inactive" <?= $donor['status'] === 'inactive' ? 'selected' : ''; ?>>Inactive</option>

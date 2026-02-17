@@ -118,36 +118,3 @@ if ($action === 'update_profile') {
         exit();
     }
 }
-
-
-
-/* =========================
-   REGISTER DONOR
-========================= */
-if ($action === 'register') {
-
-    $username = trim($_POST['username']);
-    $email    = trim($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-
-    $stmt = $conn->prepare("
-        INSERT INTO accounts (username, email, password_hash, role_id)
-        VALUES (?, ?, ?, (SELECT role_id FROM roles WHERE role_name='Donor'))
-    ");
-    $stmt->bind_param("sss", $username, $email, $password);
-    $stmt->execute();
-
-    $account_id = $stmt->insert_id;
-
-    // Create empty donor profile row
-    $stmt2 = $conn->prepare("INSERT INTO donors_users (account_id) VALUES (?)");
-    $stmt2->bind_param("i", $account_id);
-    $stmt2->execute();
-
-    // Set flash message
-    $_SESSION['flash_message'] = "Your account is pending approval. Please login after admin approval.";
-
-    // Redirect to login page
-    header("Location: ../login.php");
-    exit();
-}
