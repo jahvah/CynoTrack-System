@@ -4,19 +4,81 @@ include("../../includes/config.php");
 include("../../includes/header.php");
 include("../../includes/alert.php");
 
-// Ensure user logged in
+// Ensure donor logged in
 if (!isset($_SESSION['account_id'])) {
     die("Invalid session. Please login.");
 }
 
 $account_id = $_SESSION['account_id'];
-
-// Fetch self storage user data
-$stmt = $conn->prepare("SELECT * FROM self_storage_users WHERE account_id = ?");
-$stmt->bind_param("i", $account_id);
-$stmt->execute();
-$user = $stmt->get_result()->fetch_assoc();
 ?>
+
+<style>
+/* Container styling */
+form {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+/* Form elements */
+form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="file"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+img {
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Submit button */
+button[type="submit"] {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+</style>
 
 <h2>Complete Your Self Storage Profile</h2>
 
@@ -28,12 +90,6 @@ $user = $stmt->get_result()->fetch_assoc();
     <?php if (!empty($user['profile_image'])): ?>
         <img src="../../uploads/<?= htmlspecialchars($user['profile_image']); ?>" width="120">
     <?php endif; ?>
-
-    <label>First Name</label>
-    <input type="text" name="first_name" value="<?= htmlspecialchars($user['first_name'] ?? '') ?>" required>
-
-    <label>Last Name</label>
-    <input type="text" name="last_name" value="<?= htmlspecialchars($user['last_name'] ?? '') ?>" required>
 
     <label>Storage Details</label>
     <textarea name="storage_details" placeholder="Describe storage preferences or details..."><?= htmlspecialchars($user['storage_details'] ?? '') ?></textarea>
