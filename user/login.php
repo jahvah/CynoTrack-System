@@ -44,4 +44,9 @@ if(isset($_GET['error'])){
     <button type="submit">Login</button>
 </form>
 
+<p>
+    Don't have an account? 
+    <a href="register.php">Register here</a>
+</p>
+
 <?php include('../includes/footer.php'); ?>

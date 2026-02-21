@@ -86,13 +86,16 @@ button[type="submit"]:hover {
     <input type="hidden" name="action" value="update_profile">
 
     <label>Profile Image</label>
-    <input type="file" name="profile_image" accept="image/*">
+    <input type="file" name="profile_image" accept="image/*" required>
     <?php if (!empty($user['profile_image'])): ?>
         <img src="../../uploads/<?= htmlspecialchars($user['profile_image']); ?>" width="120">
     <?php endif; ?>
 
     <label>Storage Details</label>
-    <textarea name="storage_details" placeholder="Describe storage preferences or details..."><?= htmlspecialchars($user['storage_details'] ?? '') ?></textarea>
+    <textarea 
+        name="storage_details" 
+        placeholder="Describe storage preferences or details..." 
+        required><?= htmlspecialchars($user['storage_details'] ?? '') ?></textarea>
 
     <button type="submit">Save Profile</button>
 </form>

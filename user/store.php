@@ -23,24 +23,34 @@ function registerUser($conn, $username, $email, $password, $role_id, $first_name
     }
 
 
-    /* 🔍 CHECK FOR EXISTING USERNAME OR EMAIL */
-    $stmt = $conn->prepare("SELECT username, email FROM accounts WHERE username = ? OR email = ?");
-    $stmt->bind_param("ss", $username, $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+/* 🔍 CHECK FOR EXISTING USERNAME OR EMAIL */
+$stmt = $conn->prepare("SELECT username, email FROM accounts WHERE username = ? OR email = ?");
+$stmt->bind_param("ss", $username, $email);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        $existing = $result->fetch_assoc();
+$usernameExists = false;
+$emailExists = false;
 
-        if ($existing['username'] === $username) {
-            header("Location: register.php?error=username_exists");
-            exit;
-        }
-        if ($existing['email'] === $email) {
-            header("Location: register.php?error=email_exists");
-            exit;
-        }
+while ($row = $result->fetch_assoc()) {
+    if ($row['username'] === $username) {
+        $usernameExists = true;
     }
+    if ($row['email'] === $email) {
+        $emailExists = true;
+    }
+}
+
+if ($usernameExists && $emailExists) {
+    header("Location: register.php?error=both_exist");
+    exit;
+} elseif ($usernameExists) {
+    header("Location: register.php?error=username_exists");
+    exit;
+} elseif ($emailExists) {
+    header("Location: register.php?error=email_exists");
+    exit;
+}
 
     /* 🔐 HASH PASSWORD */
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);

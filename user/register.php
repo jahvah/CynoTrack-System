@@ -16,6 +16,7 @@ $roles = $conn->query("SELECT role_id, role_name FROM roles");
         if($_GET['error'] == 'invalid_email') echo "<p style='color:red'>Only Gmail addresses are allowed.</p>";
         if($_GET['error'] == 'username_exists') echo "<p style='color:red'>Username already taken.</p>";
         if($_GET['error'] == 'email_exists') echo "<p style='color:red'>Email already registered.</p>";
+        if($_GET['error'] == 'both_exist') echo "<p style='color:red'>Both username and email are already taken.</p>";
         if($_GET['error'] == 'system_error') echo "<p style='color:red'>System error. Try again.</p>";
         if($_GET['error'] == 'role_error') echo "<p style='color:red'>Role selection error.</p>";
     }
