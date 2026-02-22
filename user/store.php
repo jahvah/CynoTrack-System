@@ -171,6 +171,11 @@ function loginUser($conn, $email, $password) {
             header("Location: AdminUser/AdminDashboard.php");
             exit;
 
+        case 'staff':
+            $_SESSION['role_user_id'] = $user['account_id'];
+            header("Location: StaffUser/StaffDashboard.php");
+            exit;
+
         default:
             header("Location: login.php?error=role_not_found");
             exit;
