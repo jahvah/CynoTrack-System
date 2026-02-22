@@ -17,6 +17,7 @@ $query = "SELECT
             d.first_name, 
             d.last_name, 
             d.profile_image,
+            d.medical_document,
             d.medical_history,
             d.evaluation_status,
             d.height_cm,
@@ -118,6 +119,7 @@ img {
         <th>Full Name</th>
         <th>Email</th>
         <th>Username</th>
+        <th>Medical File</th>
         <th>Medical History</th>
         <th>Evaluation</th>
         <th>Height</th>
@@ -146,6 +148,18 @@ img {
                 <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
                 <td><?= htmlspecialchars($row['email']); ?></td>
                 <td><?= htmlspecialchars($row['username']); ?></td>
+             <td>
+                 <?php if (!empty($row['medical_document'])): ?>
+                   <a href="../../../medical_docs/<?= htmlspecialchars($row['medical_document']); ?>" 
+                    target="_blank" 
+                    class="action-btn edit-btn"
+                    style="background:#007bff;">
+                    View PDF
+                  </a>
+                        <?php else: ?>
+                     N/A
+                       <?php endif; ?>
+            </td>
                 <td><?= htmlspecialchars($row['medical_history'] ?? 'N/A'); ?></td>
 
                 <!-- Evaluation Badge -->

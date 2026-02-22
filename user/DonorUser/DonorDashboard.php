@@ -91,6 +91,19 @@ if ($donor['account_status'] !== 'active') {
                         <li class="list-group-item"><strong>Hair Color:</strong> <?= htmlspecialchars($donor['hair_color'] ?? 'N/A'); ?></li>
                         <li class="list-group-item"><strong>Blood Type:</strong> <?= htmlspecialchars($donor['blood_type'] ?? 'N/A'); ?></li>
                         <li class="list-group-item"><strong>Ethnicity:</strong> <?= htmlspecialchars($donor['ethnicity'] ?? 'N/A'); ?></li>
+                        <?php if (!empty($donor['medical_document'])): ?>
+    <li class="list-group-item">
+        <strong>Medical Document:</strong>
+        <a href="../../medical_docs/<?= htmlspecialchars($donor['medical_document']); ?>" 
+           target="_blank" class="btn btn-sm btn-outline-primary ms-2">
+            View Uploaded Document
+        </a>
+    </li>
+<?php else: ?>
+    <li class="list-group-item">
+        <strong>Medical Document:</strong> None uploaded
+    </li>
+<?php endif; ?>
                         <li class="list-group-item"><strong>Medical History:</strong><br><?= nl2br(htmlspecialchars($donor['medical_history'] ?? 'None')); ?></li>
                         <li class="list-group-item"><strong>Evaluation Status:</strong> <?= ucfirst($donor['evaluation_status']); ?></li>
                     </ul>

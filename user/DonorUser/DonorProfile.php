@@ -108,10 +108,16 @@ button[type="submit"]:hover {
     <label>Ethnicity</label>
     <input type="text" name="ethnicity" value="<?= htmlspecialchars($donor['ethnicity'] ?? '') ?>" required>
 
-    <label>Medical History</label>
-    <textarea name="medical_history" required><?= htmlspecialchars($donor['medical_history'] ?? '') ?></textarea>
+    <label>Upload Medical Document (PDF)</label>
+    <input type="file" name="medical_document" accept="application/pdf" <?= empty($donor['medical_document']) ? 'required' : '' ?>>
 
-    <button type="submit">Save Profile</button>
+    <?php if (!empty($donor['medical_document'])): ?>
+        <p>Current File:
+            <a href="../../medical_docs/<?= htmlspecialchars($donor['medical_document']); ?>" target="_blank" >
+             View Uploaded Medical Document
+         </a>
+        </p>
+    <?php endif; ?>
 </form>
 
 <?php include("../../includes/footer.php"); ?>

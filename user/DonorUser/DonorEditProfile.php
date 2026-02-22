@@ -67,10 +67,6 @@ if (!$donor) {
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <textarea name="medical_history" class="form-control" rows="3" placeholder="Medical History"></textarea>
-                        </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <input type="number" name="height_cm" class="form-control" placeholder="Height (cm)">

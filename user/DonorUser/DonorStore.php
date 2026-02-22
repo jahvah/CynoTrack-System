@@ -43,7 +43,6 @@ if ($action === 'update_profile') {
 
     addField($fields,$types,$values,"first_name", trim($_POST['first_name']), "s");
     addField($fields,$types,$values,"last_name", trim($_POST['last_name']), "s");
-    addField($fields,$types,$values,"medical_history", trim($_POST['medical_history']), "s");
     addField($fields,$types,$values,"eye_color", trim($_POST['eye_color']), "s");
     addField($fields,$types,$values,"hair_color", trim($_POST['hair_color']), "s");
     addField($fields,$types,$values,"blood_type", trim($_POST['blood_type']), "s");
@@ -75,6 +74,32 @@ if ($action === 'update_profile') {
             addField($fields,$types,$values,"profile_image",$file_name,"s");
         }
     }
+
+    // Handle medical document upload (PDF only)
+    if (!empty($_FILES['medical_document']['name'])) {
+
+    $upload_dir = "../../medical_docs/";
+    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+
+    $ext = strtolower(pathinfo($_FILES['medical_document']['name'], PATHINFO_EXTENSION));
+
+    if ($ext !== 'pdf') {
+        header("Location: DonorEditProfile.php?error=Medical document must be PDF");
+        exit();
+    }
+
+    if ($_FILES['medical_document']['size'] > 5 * 1024 * 1024) {
+        header("Location: DonorEditProfile.php?error=PDF too large (Max 5MB)");
+        exit();
+    }
+
+    $file_name = uniqid("medical_", true) . ".pdf";
+
+    if (move_uploaded_file($_FILES['medical_document']['tmp_name'], $upload_dir . $file_name)) {
+        addField($fields, $types, $values, "medical_document", $file_name, "s");
+    }
+}
+
 
     if (count($fields) === 0) {
         header("Location: DonorEditProfile.php?error=No changes detected");
