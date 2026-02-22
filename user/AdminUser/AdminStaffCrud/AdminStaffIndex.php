@@ -37,6 +37,11 @@ $result = mysqli_query($conn, $query);
     align-items: center;
 }
 
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
 .create-btn {
     padding: 10px 18px;
     background: green;
@@ -79,14 +84,30 @@ img {
 
 .edit-btn { background: orange; }
 .delete-btn { background: red; }
+
+.back-btn {
+    padding: 10px 18px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.back-btn:hover {
+    background: #333;
+}
 </style>
 
 <div class="container">
 
     <div class="top-bar">
         <h2>Staff Management</h2>
-        <!-- CREATE BUTTON -->
-        <a href="AdminStaffCreate.php" class="create-btn">+ Add Staff</a>
+
+        <div class="button-group">
+            <a href="../AdminDashboard.php" class="back-btn">← Back to Dashboard</a>
+            <a href="AdminStaffCreate.php" class="create-btn">+ Add Staff</a>
+        </div>
     </div>
 
     <table>
