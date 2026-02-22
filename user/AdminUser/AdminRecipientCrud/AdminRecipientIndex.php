@@ -39,12 +39,30 @@ $result = mysqli_query($conn, $query);
     align-items: center;
 }
 
+/* Container for buttons inside top-bar */
+.top-bar div {
+    display: flex;
+    gap: 10px; /* space between buttons */
+}
+
 .create-btn {
     padding: 10px 18px;
     background: green;
     color: white;
     text-decoration: none;
     border-radius: 5px;
+}
+
+.back-btn {
+    padding: 10px 18px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.back-btn:hover {
+    background: #333;
 }
 
 table {
@@ -86,10 +104,12 @@ img {
 <div class="container">
 
     <div class="top-bar">
-        <h2>Recipient Management</h2>
+    <h2>Recipient Management</h2>
+    <div>
+        <a href="../AdminDashboard.php" class="back-btn">← Back to Dashboard</a>
         <a href="AdminRecipientCreate.php" class="create-btn">+ Add Recipient</a>
     </div>
-
+</div>
     <table>
         <tr>
             <th>ID</th>

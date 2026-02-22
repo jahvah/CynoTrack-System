@@ -32,19 +32,19 @@ if ($_POST['action'] === 'AdminDonorStore') {
     $blood_type       = trim($_POST['blood_type']);
     $ethnicity        = trim($_POST['ethnicity']);
 
-       // ✅ EMAIL MUST BE @gmail.com
+       //EMAIL MUST BE @gmail.com
     if (!preg_match("/^[a-zA-Z0-9._%+-]+@gmail\.com$/", $email)) {
         $_SESSION['error'] = "Email must be a valid @gmail.com address";
         header("Location: AdminDonorCreate.php");
         exit();
     }
     // PROFILE IMAGE
-$image_name = null;
-if (!empty($_FILES['profile_image']['name'])) {
+    $image_name = null;
+    if (!empty($_FILES['profile_image']['name'])) {
     $target_dir = "../../../uploads/";
     $image_name = time() . "_" . basename($_FILES["profile_image"]["name"]);
 
-    // ✅ Validate file type (image only)
+    // Validate file type (image only)
     $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
     $file_extension = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
 
@@ -265,17 +265,28 @@ if ($_POST['action'] === 'AdminDonorUpdate') {
             mkdir($target_dir, 0777, true);
         }
 
-        $image_name = time() . "_" . basename($_FILES["profile_image"]["name"]);
+        $image_name = time() . "_" . basename($_FILES['profile_image']['name']);
         $target_file = $target_dir . $image_name;
+
+        // Optional: Check if file is an image
+        $check = getimagesize($_FILES["profile_image"]["tmp_name"]);
+        if ($check === false) {
+            $_SESSION['error'] = "Uploaded file must be an image (jpg, png, gif).";
+            header("Location: $redirect");
+            exit();
+        }
 
         if (move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_file)) {
 
-            if ($image_name !== $current_donor['profile_image']) {
-                $stmt = $conn->prepare("UPDATE donors_users SET profile_image=? WHERE donor_id=?");
-                $stmt->bind_param("si", $image_name, $donor_id);
-                $stmt->execute();
-                $updated = true;
+            // Delete old image if exists and not default
+            if (!empty($current_recipient['profile_image']) && file_exists($target_dir . $current_recipient['profile_image'])) {
+                unlink($target_dir . $current_recipient['profile_image']);
             }
+
+            $stmt = $conn->prepare("UPDATE donors_users SET profile_image=? WHERE donor_id=?");
+            $stmt->bind_param("si", $image_name, $recipient_id);
+            $stmt->execute();
+            $updated = true;
         }
     }
 

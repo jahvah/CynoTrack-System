@@ -25,15 +25,33 @@ if ($_POST['action'] === 'AdminRecipientStore') {
     $status     = $_POST['status'] ?? 'active';
     $preferences = trim($_POST['preferences']);
 
+     //EMAIL MUST BE @gmail.com
+    if (!preg_match("/^[a-zA-Z0-9._%+-]+@gmail\.com$/", $email)) {
+        $_SESSION['error'] = "Email must be a valid @gmail.com address";
+        header("Location: AdminRecipientCreate.php");
+        exit();
+    }
+
     //PROFILE IMAGE
      $image_name = null;
     if (!empty($_FILES['profile_image']['name'])) {
-        $target_dir = "../../../uploads/";
-        $image_name = time() . "_" . basename($_FILES["profile_image"]["name"]);
-        move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_dir . $image_name);
-    } else {
-        $image_name = "default.png"; // default placeholder if no image uploaded
+    $target_dir = "../../../uploads/";
+    $image_name = time() . "_" . basename($_FILES["profile_image"]["name"]);
+
+    // Validate file type (image only)
+    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
+    $file_extension = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
+
+    if (!in_array($file_extension, $allowed_types)) {
+        $_SESSION['error'] = "Profile image must be a valid image file (JPG, JPEG, PNG, GIF)";
+        header("Location: AdminRecipientCreate.php");
+        exit();
     }
+
+    move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_dir . $image_name);
+} else {
+    $image_name = "default.png"; // default placeholder if no image uploaded
+}
 
     // Check duplicates
     $stmtUser = $conn->prepare("SELECT account_id FROM accounts WHERE username=?");
@@ -87,59 +105,103 @@ if ($_POST['action'] === 'AdminRecipientStore') {
 
 }
 
-//update recipient
+// UPDATE RECIPIENT
 if ($_POST['action'] === 'AdminRecipientUpdate') {
 
     $recipient_id = intval($_POST['recipient_id']);
     $account_id   = intval($_POST['account_id']);
-    $first_name = trim($_POST['first_name']);
-    $last_name  = trim($_POST['last_name']);
-    $status     = trim($_POST['status']);
+    $redirect     = "AdminRecipientUpdate.php?id=" . $recipient_id;
+
+    // 🔎 Fetch current database values
+    $stmt = $conn->prepare("SELECT * FROM recipients_users WHERE recipient_id=?");
+    $stmt->bind_param("i", $recipient_id);
+    $stmt->execute();
+    $current_recipient = $stmt->get_result()->fetch_assoc();
+
+    $stmt = $conn->prepare("SELECT status FROM accounts WHERE account_id=?");
+    $stmt->bind_param("i", $account_id);
+    $stmt->execute();
+    $current_account = $stmt->get_result()->fetch_assoc();
+
+    // 📝 New submitted values
+    $first_name  = trim($_POST['first_name']);
+    $last_name   = trim($_POST['last_name']);
+    $status      = trim($_POST['status']);
     $preferences = trim($_POST['preferences']);
 
-    $redirect = "AdminRecipientUpdate.php?id=" . $recipient_id;
+    $updated = false;
 
-    /* Update status */
-    if (!empty($status) && in_array($status, ['active','inactive','pending'])) {
+    // ================= ACCOUNT STATUS =================
+    if (!empty($status) && $status !== $current_account['status'] && in_array($status, ['active','inactive','pending'])) {
         $stmt = $conn->prepare("UPDATE accounts SET status=? WHERE account_id=?");
         $stmt->bind_param("si", $status, $account_id);
         $stmt->execute();
+        $updated = true;
     }
 
-    /* UPDATE FIRST NAME */
-    if (!empty($first_name)) {
+    // ================= RECIPIENT FIELDS =================
+    if (!empty($first_name) && $first_name !== $current_recipient['first_name']) {
         $stmt = $conn->prepare("UPDATE recipients_users SET first_name=? WHERE recipient_id=?");
         $stmt->bind_param("si", $first_name, $recipient_id);
         $stmt->execute();
+        $updated = true;
     }
 
-   /* UPDATE LAST NAME */
-    if (!empty($last_name)) {
+    if (!empty($last_name) && $last_name !== $current_recipient['last_name']) {
         $stmt = $conn->prepare("UPDATE recipients_users SET last_name=? WHERE recipient_id=?");
         $stmt->bind_param("si", $last_name, $recipient_id);
         $stmt->execute();
+        $updated = true;
     }
 
-    /* preferences */
-    if (!empty($preferences)) {
+    if (!empty($preferences) && $preferences !== $current_recipient['preferences']) {
         $stmt = $conn->prepare("UPDATE recipients_users SET preferences=? WHERE recipient_id=?");
         $stmt->bind_param("si", $preferences, $recipient_id);
         $stmt->execute();
+        $updated = true;
     }
 
-    /* UPDATE PROFILE IMAGE */
+    // ================= PROFILE IMAGE =================
     if (!empty($_FILES['profile_image']['name'])) {
+
         $target_dir = "../../../uploads/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
+
         $image_name = time() . "_" . basename($_FILES['profile_image']['name']);
-        move_uploaded_file($_FILES['profile_image']['tmp_name'], $target_dir . $image_name);
+        $target_file = $target_dir . $image_name;
 
-        $stmt = $conn->prepare("UPDATE recipients_users SET profile_image=? WHERE recipient_id=?");
-        $stmt->bind_param("si", $image_name, $recipient_id);
-        $stmt->execute();
+        // Optional: Check if file is an image
+        $check = getimagesize($_FILES["profile_image"]["tmp_name"]);
+        if ($check === false) {
+            $_SESSION['error'] = "Uploaded file must be an image (jpg, png, gif).";
+            header("Location: $redirect");
+            exit();
+        }
+
+        if (move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_file)) {
+
+            // Delete old image if exists and not default
+            if (!empty($current_recipient['profile_image']) && file_exists($target_dir . $current_recipient['profile_image'])) {
+                unlink($target_dir . $current_recipient['profile_image']);
+            }
+
+            $stmt = $conn->prepare("UPDATE recipients_users SET profile_image=? WHERE recipient_id=?");
+            $stmt->bind_param("si", $image_name, $recipient_id);
+            $stmt->execute();
+            $updated = true;
+        }
     }
-    
 
-    $_SESSION['success'] = "Recipient updated successfully";
-    header("Location: $redirect");    exit();
+    // ================= FINAL MESSAGE =================
+    if ($updated) {
+        $_SESSION['success'] = "Recipient updated successfully!";
+    } else {
+        $_SESSION['error'] = "No changes detected.";
+    }
+
+    header("Location: $redirect");
+    exit();
 }
 ?>
