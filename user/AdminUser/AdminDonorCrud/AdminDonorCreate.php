@@ -29,9 +29,24 @@ button {
 }
 .error { background:#f8d7da; color:#721c24; }
 .success { background:#d4edda; color:#155724; }
+
+.back-btn {
+    display: inline-block;
+    padding: 8px 15px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.back-btn:hover {
+    background: #333;
+}
 </style>
 
 <div class="container">
+
+    <a href="AdminDonorIndex.php" class="back-btn">← Back to Dashboard</a>
     <h2>Add New Donor</h2>
 
         <!-- Display messages -->
@@ -95,6 +110,10 @@ button {
 
         <label>Profile Image</label>
         <input type="file" name="profile_image">
+
+        <label>Medical History PDF</label>
+        <input type="file" name="medical_document" accept="application/pdf">
+        <small>Upload PDF file only (optional)</small>
 
         <button type="submit">Create Donor</button>
     </form>

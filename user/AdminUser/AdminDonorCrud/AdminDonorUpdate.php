@@ -59,6 +59,20 @@ img {
 .error { background:#f8d7da; color:#721c24; }
 .success { background:#d4edda; color:#155724; }
 
+.back-btn {
+    display: inline-block;
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.back-btn:hover {
+    background: #333;
+}
+
 </style>
 
 <div class="container">
@@ -72,6 +86,11 @@ img {
     <?php if (isset($_SESSION['success'])): ?>
         <div class="message success"><?= $_SESSION['success']; ?></div>
         <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['no_update'])): ?>
+    <div class="message error"><?= $_SESSION['no_update']; ?></div>
+    <?php unset($_SESSION['no_update']); ?>
     <?php endif; ?>
 
     <form action="AdminDonorStore.php" method="POST" enctype="multipart/form-data">
@@ -141,6 +160,7 @@ img {
         </select>
 
         <button type="submit">Update Donor</button>
+        <a href="AdminDonorIndex.php" class="back-btn">← Back to Index</a>
     </form>
 </div>
 

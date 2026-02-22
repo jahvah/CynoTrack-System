@@ -102,15 +102,32 @@ img {
 .green { background: green; }
 .red { background: red; }
 .yellow { background: orange; }
+
+.back-btn {
+    padding: 10px 18px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.back-btn:hover {
+    background: #333;
+}
 </style>
 
 <div class="container">
 
 
     <div class="top-bar">
-        <h2>Donor Management</h2>
+    <h2>Donor Management</h2>
+    
+    <div>
+        <a href="../AdminDashboard.php" class="back-btn">← Back to Dashboard</a>
         <a href="AdminDonorCreate.php" class="create-btn">+ Add Donor</a>
     </div>
+</div>
 
     <table>
     <tr>
