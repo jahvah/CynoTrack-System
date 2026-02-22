@@ -64,6 +64,21 @@ img { width: 120px; border-radius: 8px; display: block; }
 }
 .error { background:#f8d7da; color:#721c24; }
 .success { background:#d4edda; color:#155724; }
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 15px;
+    padding: 8px 12px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.back-btn:hover {
+    background: #333;
+}
+
 </style>
 
 <div class="container">
@@ -118,6 +133,7 @@ img { width: 120px; border-radius: 8px; display: block; }
         </select>
 
         <button type="submit">Update Self Storage User</button>
+        <a href="AdminSelfStorageIndex.php" class="back-btn">← Back to Index</a>
     </form>
 </div>
 

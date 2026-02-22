@@ -29,9 +29,23 @@ button {
 }
 .error { background:#f8d7da; color:#721c24; }
 .success { background:#d4edda; color:#155724; }
+
+.back-btn {
+    display: inline-block;
+    padding: 8px 15px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.back-btn:hover {
+    background: #333;
+}
 </style>
 
 <div class="container">
+     <a href="AdminSelfStorageIndex.php" class="back-btn">← Back to Dashboard</a>
     <h2>Add New Self-Storage User</h2>
 
     <?php if (isset($_SESSION['error'])): ?>
@@ -70,11 +84,10 @@ button {
         </select>
 
         <label>Profile Image</label>
-        <input type="file" name="profile_image">
+        <input type="file" name="profile_image" required>
 
         <label>Storage Details</label>
-        <textarea name="storage_details" placeholder="Enter storage details (optional)"></textarea>
-
+    <textarea name="storage_details" placeholder="Enter storage details" required></textarea>
         <button type="submit">Create Self-Storage User</button>
     </form>
 </div>

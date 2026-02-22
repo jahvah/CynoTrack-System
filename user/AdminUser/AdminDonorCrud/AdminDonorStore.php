@@ -279,12 +279,12 @@ if ($_POST['action'] === 'AdminDonorUpdate') {
         if (move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_file)) {
 
             // Delete old image if exists and not default
-            if (!empty($current_recipient['profile_image']) && file_exists($target_dir . $current_recipient['profile_image'])) {
-                unlink($target_dir . $current_recipient['profile_image']);
+            if (!empty($current_donor['profile_image']) && file_exists($target_dir . $current_donor['profile_image'])) {
+                unlink($target_dir . $current_donor['profile_image']);
             }
 
             $stmt = $conn->prepare("UPDATE donors_users SET profile_image=? WHERE donor_id=?");
-            $stmt->bind_param("si", $image_name, $recipient_id);
+            $stmt->bind_param("si", $image_name, $donor_id);
             $stmt->execute();
             $updated = true;
         }

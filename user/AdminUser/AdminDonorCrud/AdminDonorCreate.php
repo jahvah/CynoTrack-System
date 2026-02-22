@@ -109,7 +109,7 @@ button {
         <input type="text" name="ethnicity">
 
         <label>Profile Image</label>
-        <input type="file" name="profile_image">
+        <input type="file" name="profile_image" required>
 
         <label>Medical History PDF</label>
         <input type="file" name="medical_document" accept="application/pdf">

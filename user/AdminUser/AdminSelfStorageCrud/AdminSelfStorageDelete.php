@@ -48,6 +48,11 @@ if (!empty($image) && file_exists("../../../uploads/" . $image)) {
     unlink("../../../uploads/" . $image);
 }
 
+// Delete medical document file
+if (!empty($medical_doc) && file_exists("../../../medical_docs/" . $medical_doc)) {
+    unlink("../../../medical_docs/" . $medical_doc);
+}
+
 header("Location: AdminSelfStorageIndex.php?success=storage_user_deleted");
 exit();
 ?>

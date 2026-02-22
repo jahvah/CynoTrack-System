@@ -43,6 +43,18 @@ $result = mysqli_query($conn, $query);
     text-decoration: none;
     border-radius: 5px;
 }
+.back-btn {
+    padding: 10px 18px;
+    background: #555;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.back-btn:hover {
+    background: #333;
+}
 
 table {
     width: 100%;
@@ -83,10 +95,13 @@ img {
 <div class="container">
 
     <div class="top-bar">
-        <h2>Self-Storage Users Management</h2>
-        <!-- CREATE BUTTON -->
+    <h2>Self-Storage Users Management</h2>
+
+    <div>
+        <a href="../AdminDashboard.php" class="back-btn">← Back to Dashboard</a>
         <a href="AdminSelfStorageCreate.php" class="create-btn">+ Add Self-Storage User</a>
     </div>
+</div>
 
     <table>
         <tr>
