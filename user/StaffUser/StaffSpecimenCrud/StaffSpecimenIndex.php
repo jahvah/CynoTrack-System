@@ -128,7 +128,7 @@ th {
 
     <div class="top-bar" style="margin-top: 20px;">
         <h3>Donor Specimens</h3>
-        <a href="StaffSpecimenCreateDonor.php" class="create-btn">+ Add Donor Specimen</a>
+        <a href="StaffSpecimenDonorCreate.php" class="create-btn">+ Add Donor Specimen</a>
     </div>
 
     <table>
@@ -162,7 +162,7 @@ th {
                     <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
                     <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
                     <td>
-                        <a href="StaffSpecimenUpdateDonor.php?type=donor&id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffSpecimenDonorUpdate.php?type=donor&id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
                         <a href="StaffSpecimenDelete.php?type=donor&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
                 </tr>
@@ -176,7 +176,7 @@ th {
 
     <div class="top-bar">
         <h3>Self-Storage Specimens</h3>
-        <a href="StaffSpecimenCreateStorage.php" class="create-btn">+ Add Storage Specimen</a>
+        <a href="StaffSpecimenStorageCreate.php" class="create-btn">+ Add Storage Specimen</a>
     </div>
 
     <table>
@@ -208,7 +208,7 @@ th {
                     <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
                     <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
                     <td>
-                        <a href="StaffSpecimenUpdateStorage.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffSpecimenStorageUpdate.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
                         <a href="StaffSpecimenDelete.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
                 </tr>
