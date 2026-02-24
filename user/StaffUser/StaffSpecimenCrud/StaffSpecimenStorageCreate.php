@@ -95,14 +95,6 @@ button {
     <label>Quantity</label>
     <input type="number" name="quantity" min="1" required>
 
-    <label>Status</label>
-    <select name="status" required>
-        <option value="" disabled selected>Select status</option>
-        <option value="stored">Stored</option>
-        <option value="used">Used</option>
-        <option value="disposed">Disposed</option>
-    </select>
-
     <label>Storage Location</label>
     <input type="text" name="storage_location" required>
 

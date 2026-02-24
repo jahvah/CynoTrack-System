@@ -77,14 +77,17 @@ button {
         <input type="hidden" name="unique_code" value="<?= htmlspecialchars($specimen['unique_code']); ?>">
 
         <label>Quantity</label>
-        <input type="number" name="quantity" min="1">
+        <input type="number" name="quantity" min="0">
 
         <label>Status</label>
         <select name="status">
             <option value="">Select status</option>
-            <option value="screening">Screening</option>
             <option value="approved">Approved</option>
+            <option value="disapproved">Disapproved</option>
             <option value="stored">Stored</option>
+            <option value="used">Used</option>
+            <option value="expired">Expired</option>
+            <option value="disposed">Disposed</option>
         </select>
 
         <label>Storage Location</label>

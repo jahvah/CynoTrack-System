@@ -20,11 +20,33 @@ if ($specimen_id <= 0 || !in_array($type, ['donor', 'storage'])) {
 // Determine table
 $table = $type === 'donor' ? 'donor_specimens' : 'storage_specimens';
 
-// Delete specimen
-$stmt = $conn->prepare("DELETE FROM $table WHERE specimen_id = ?");
-$stmt->bind_param("i", $specimen_id);
-$stmt->execute();
-$stmt->close();
+// 1️⃣ Get current quantity before deleting
+$get_stmt = $conn->prepare("SELECT quantity FROM $table WHERE specimen_id = ?");
+$get_stmt->bind_param("i", $specimen_id);
+$get_stmt->execute();
+$result = $get_stmt->get_result();
+$current = $result->fetch_assoc();
+$get_stmt->close();
+
+if ($current) {
+
+    $quantity = (int)$current['quantity'];
+
+    // 2️⃣ Insert inventory log as disposed
+    $log_stmt = $conn->prepare("
+        INSERT INTO inventory_logs (specimen_id, action, quantity) 
+        VALUES (?, 'disposed', ?)
+    ");
+    $log_stmt->bind_param("ii", $specimen_id, $quantity);
+    $log_stmt->execute();
+    $log_stmt->close();
+
+    // 3️⃣ Delete specimen
+    $del_stmt = $conn->prepare("DELETE FROM $table WHERE specimen_id = ?");
+    $del_stmt->bind_param("i", $specimen_id);
+    $del_stmt->execute();
+    $del_stmt->close();
+}
 
 // Redirect back to index
 header("Location: StaffSpecimenIndex.php");

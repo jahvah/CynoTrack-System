@@ -82,8 +82,11 @@ button {
         <label>Status</label>
         <select name="status">
             <option value="">Select status</option>
+            <option value="approved">Approved</option>
+            <option value="disapproved">Disapproved</option>
             <option value="stored">Stored</option>
             <option value="used">Used</option>
+            <option value="expired">Expired</option>
             <option value="disposed">Disposed</option>
         </select>
 
