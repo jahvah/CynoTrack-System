@@ -83,7 +83,9 @@ th {
     background: #007bff;
     color: white;
 }
-
+.message { padding: 12px; margin-bottom: 15px; border-radius: 5px; }
+.error { background:#f8d7da; color:#721c24; }
+.success { background:#d4edda; color:#155724; }
 .action-btn {
     padding: 6px 10px;
     text-decoration: none;
@@ -124,9 +126,20 @@ th {
 
 <div class="container">
 
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="message error"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+
     <div class="top-bar">
         <h2>Appointment Management</h2>
         <a href="../StaffDashboard.php" class="back-btn">← Back to Dashboard</a>
+
     </div>
 
     <!-- ================= DONOR APPOINTMENTS ================= -->
@@ -163,7 +176,7 @@ th {
                     </td>
                     <td>
                         <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentDelete.php?type=donor&id=<?= $row['appointment_id']; ?>" 
+                        <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorDelete.php?id=<?= $row['appointment_id']; ?>" 
                            class="action-btn delete-btn"
                         onclick="return confirm('Are you sure?');">Delete</a>
                         </a>
