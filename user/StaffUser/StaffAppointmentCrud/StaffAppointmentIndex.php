@@ -184,7 +184,7 @@ th {
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="5">No donor appointments found.</td></tr>
+            <tr><td colspan="6">No donor appointments found.</td></tr>
         <?php endif; ?>
     </table>
 
@@ -193,7 +193,7 @@ th {
     <!-- ================= RECIPIENT APPOINTMENTS ================= -->
 <div class="top-bar">
     <h3>Recipient Appointments</h3>
-    <a href="StaffAppointmentRecipientCreate.php" class="create-btn">
+    <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientCreate.php" class="create-btn">
         + Add Recipient Appointment
     </a>
 </div>
@@ -224,15 +224,15 @@ th {
                     </td>
 
                     <td>
-                        <a href="StaffAppointmentDonorUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentDelete.php?type=donor&id=<?= $row['appointment_id']; ?>" 
+                        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientDelete.php?type=recipient&id=<?= $row['appointment_id']; ?>" 
                         class="action-btn delete-btn"
                         onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="5">No recipient appointments found.</td></tr>
+            <tr><td colspan="6">No recipient appointments found.</td></tr>
         <?php endif; ?>
     </table>
 
