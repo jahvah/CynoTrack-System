@@ -23,7 +23,7 @@ if ($appointment_id <= 0) {
 }
 
 // Delete the recipient appointment
-$stmt = $conn->prepare("DELETE FROM appointments WHERE appointment_id = ? AND recipient_id IS NOT NULL");
+$stmt = $conn->prepare("DELETE FROM appointments WHERE appointment_id = ? AND user_type = 'recipient'");
 $stmt->bind_param("i", $appointment_id);
 
 if ($stmt->execute()) {
@@ -32,7 +32,7 @@ if ($stmt->execute()) {
     $_SESSION['error'] = "Failed to delete appointment.";
 }
 
-// Redirect back to the appointment index
+// Redirect back to the recipient appointment index
 header("Location: ../StaffAppointmentIndex.php");
 exit();
 ?>

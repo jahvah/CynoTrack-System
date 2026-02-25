@@ -2,6 +2,7 @@
 session_start();
 include('../../../../includes/config.php');
 
+// STAFF access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'staff') {
     header("Location: ../../../../unauthorized.php");
     exit();
@@ -46,7 +47,7 @@ if ($action === 'create_recipient_appointment') {
     // 3️⃣ Check if recipient already has an appointment that day
     $stmt_day = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE recipient_id = ? AND DATE(appointment_date) = ?
+        WHERE user_type = 'recipient' AND user_id = ? AND DATE(appointment_date) = ?
     ");
     $stmt_day->bind_param("is", $recipient_id, $date_only);
     $stmt_day->execute();
@@ -57,27 +58,27 @@ if ($action === 'create_recipient_appointment') {
         exit();
     }
 
-    // 4️⃣ Check if the hour is already booked by ANY appointment
+    // 4️⃣ Check if the hour is already booked by ANY recipient
     $start_hour = date('Y-m-d H:00:00', $appointment_datetime);
     $end_hour   = date('Y-m-d H:59:59', $appointment_datetime);
 
     $stmt_hour = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE appointment_date BETWEEN ? AND ?
+        WHERE user_type = 'recipient' AND appointment_date BETWEEN ? AND ?
     ");
     $stmt_hour->bind_param("ss", $start_hour, $end_hour);
     $stmt_hour->execute();
     $result_hour = $stmt_hour->get_result();
     if ($result_hour->num_rows > 0) {
-        $_SESSION['error'] = "This time slot is already booked. Please choose another hour.";
+        $_SESSION['error'] = "This time slot is already booked for a recipient. Please choose another hour.";
         header("Location: StaffAppointmentRecipientCreate.php");
         exit();
     }
 
     // ✅ Insert appointment if all checks pass
     $stmt = $conn->prepare("
-        INSERT INTO appointments (recipient_id, appointment_date, type, status)
-        VALUES (?, ?, 'consultation', ?)
+        INSERT INTO appointments (user_type, user_id, appointment_date, type, status)
+        VALUES ('recipient', ?, ?, 'consultation', ?)
     ");
     $stmt->bind_param("iss", $recipient_id, $appointment_date, $status);
 
@@ -91,51 +92,78 @@ if ($action === 'create_recipient_appointment') {
     exit();
 }
 
-
 // ================= UPDATE RECIPIENT APPOINTMENT =================
 if ($action === 'update_recipient_appointment') {
 
     $appointment_id = intval($_POST['appointment_id'] ?? 0);
-    $appointment_date = $_POST['appointment_date'] ?? '';
-    $status = $_POST['status'] ?? '';
+    $new_date = $_POST['appointment_date'] ?? '';
+    $new_status = $_POST['status'] ?? '';
 
-    if ($appointment_id <= 0 || empty($appointment_date)) {
+    if ($appointment_id <= 0 || empty($new_date)) {
         $_SESSION['error'] = "Invalid appointment or missing date.";
         header("Location: StaffAppointmentRecipientUpdate.php?id=" . $appointment_id);
         exit();
     }
 
-    $appointment_datetime = strtotime($appointment_date);
+    // Fetch current appointment
+    $stmt_curr = $conn->prepare("
+        SELECT appointment_date, status 
+        FROM appointments 
+        WHERE appointment_id = ? AND user_type = 'recipient'
+    ");
+    $stmt_curr->bind_param("i", $appointment_id);
+    $stmt_curr->execute();
+    $result_curr = $stmt_curr->get_result();
+
+    if ($result_curr->num_rows === 0) {
+        $_SESSION['error'] = "Appointment not found.";
+        header("Location: StaffAppointmentRecipientUpdate.php?id=" . $appointment_id);
+        exit();
+    }
+
+    $current = $result_curr->fetch_assoc();
+
+    // Check if there are any actual changes
+    $current_date = date('Y-m-d H:i', strtotime($current['appointment_date']));
+    $new_date_normalized = date('Y-m-d H:i', strtotime($new_date));
+
+    if ($current_date === $new_date_normalized && $current['status'] === $new_status) {
+        $_SESSION['error'] = "No changes detected.";
+        header("Location: StaffAppointmentRecipientUpdate.php?id=" . $appointment_id);
+        exit();
+    }
+
+    // Proceed with the same validations as before (past date, operating hours, hourly conflict)
+    $appointment_datetime = strtotime($new_date);
     $now = time();
 
-    // 1️⃣ Cannot update to past date/time
     if ($appointment_datetime < $now) {
         $_SESSION['error'] = "Cannot set appointment for past date/time.";
         header("Location: StaffAppointmentRecipientUpdate.php?id=" . $appointment_id);
         exit();
     }
 
-    // Extract hour
     $hour = intval(date('H', $appointment_datetime));
-
-    // 2️⃣ Operating hours 7am-7pm
     if ($hour < 7 || $hour >= 19) {
         $_SESSION['error'] = "Appointments can only be booked between 7:00 AM and 7:00 PM.";
         header("Location: StaffAppointmentRecipientUpdate.php?id=" . $appointment_id);
         exit();
     }
 
-    // 3️⃣ Check if the hour is already booked by ANY OTHER appointment
+    // Check if the hour is already booked by another recipient
     $start_hour = date('Y-m-d H:00:00', $appointment_datetime);
     $end_hour   = date('Y-m-d H:59:59', $appointment_datetime);
 
     $stmt_hour = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE appointment_date BETWEEN ? AND ? AND appointment_id != ?
+        WHERE appointment_date BETWEEN ? AND ? 
+        AND appointment_id != ? 
+        AND user_type = 'recipient'
     ");
     $stmt_hour->bind_param("ssi", $start_hour, $end_hour, $appointment_id);
     $stmt_hour->execute();
     $result_hour = $stmt_hour->get_result();
+
     if ($result_hour->num_rows > 0) {
         $_SESSION['error'] = "This time slot is already booked. Please choose another hour.";
         header("Location: StaffAppointmentRecipientUpdate.php?id=" . $appointment_id);
@@ -146,9 +174,9 @@ if ($action === 'update_recipient_appointment') {
     $stmt = $conn->prepare("
         UPDATE appointments
         SET appointment_date = ?, status = ?
-        WHERE appointment_id = ? AND recipient_id IS NOT NULL
+        WHERE appointment_id = ? AND user_type = 'recipient'
     ");
-    $stmt->bind_param("ssi", $appointment_date, $status, $appointment_id);
+    $stmt->bind_param("ssi", $new_date, $new_status, $appointment_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Recipient appointment updated successfully.";
@@ -156,7 +184,6 @@ if ($action === 'update_recipient_appointment') {
         $_SESSION['error'] = "Failed to update appointment.";
     }
 
-    // Redirect BACK to the update page with ID
     header("Location: StaffAppointmentRecipientUpdate.php?id=" . $appointment_id);
     exit();
 }

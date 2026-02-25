@@ -103,7 +103,7 @@ button {
 </div>
 
 <script>
-// Pass PHP recipient array to JS
+// Pass PHP recipients array to JS
 const recipients = <?php echo json_encode($recipients); ?>;
 
 const searchInput = document.getElementById('recipient_search_input');
