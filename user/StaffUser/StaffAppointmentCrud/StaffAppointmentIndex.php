@@ -15,10 +15,11 @@ $donor_query = "SELECT
         a.appointment_date,
         a.type,
         a.status,
-        d.first_name,
-        d.last_name
+        u.first_name,
+        u.last_name
     FROM appointments a
-    JOIN donors_users d ON a.donor_id = d.donor_id
+    JOIN donors_users u ON a.user_id = u.donor_id
+    WHERE a.user_type = 'donor'
     ORDER BY a.appointment_id DESC";
 $donor_result = mysqli_query($conn, $donor_query);
 
@@ -28,10 +29,11 @@ $recipient_query = "SELECT
         a.appointment_date,
         a.type,
         a.status,
-        r.first_name,
-        r.last_name
+        u.first_name,
+        u.last_name
     FROM appointments a
-    JOIN recipients_users r ON a.recipient_id = r.recipient_id
+    JOIN recipients_users u ON a.user_id = u.recipient_id
+    WHERE a.user_type = 'recipient'
     ORDER BY a.appointment_id DESC";
 $recipient_result = mysqli_query($conn, $recipient_query);
 
@@ -41,10 +43,11 @@ $storage_query = "SELECT
         a.appointment_date,
         a.type,
         a.status,
-        s.first_name,
-        s.last_name
+        u.first_name,
+        u.last_name
     FROM appointments a
-    JOIN self_storage_users s ON a.storage_user_id = s.storage_user_id
+    JOIN self_storage_users u ON a.user_id = u.storage_user_id
+    WHERE a.user_type = 'storage'
     ORDER BY a.appointment_id DESC";
 $storage_result = mysqli_query($conn, $storage_query);
 ?>
@@ -139,16 +142,15 @@ th {
     <div class="top-bar">
         <h2>Appointment Management</h2>
         <a href="../StaffDashboard.php" class="back-btn">← Back to Dashboard</a>
-
     </div>
 
     <!-- ================= DONOR APPOINTMENTS ================= -->
-<div class="top-bar" style="margin-top: 20px;">
-    <h3>Donor Appointments</h3>
-    <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorCreate.php" class="create-btn">
-        + Add Donor Appointment
-    </a>
-</div>
+    <div class="top-bar" style="margin-top: 20px;">
+        <h3>Donor Appointments</h3>
+        <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorCreate.php" class="create-btn">
+            + Add Donor Appointment
+        </a>
+    </div>
 
     <table>
         <tr>
@@ -178,8 +180,7 @@ th {
                         <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
                         <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorDelete.php?id=<?= $row['appointment_id']; ?>" 
                            class="action-btn delete-btn"
-                        onclick="return confirm('Are you sure?');">Delete</a>
-                        </a>
+                           onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -191,12 +192,12 @@ th {
     <div class="section-divider"></div>
 
     <!-- ================= RECIPIENT APPOINTMENTS ================= -->
-<div class="top-bar">
-    <h3>Recipient Appointments</h3>
-    <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientCreate.php" class="create-btn">
-        + Add Recipient Appointment
-    </a>
-</div>
+    <div class="top-bar">
+        <h3>Recipient Appointments</h3>
+        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientCreate.php" class="create-btn">
+            + Add Recipient Appointment
+        </a>
+    </div>
 
     <table>
         <tr>
@@ -225,7 +226,7 @@ th {
 
                     <td>
                         <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientDelete.php?type=recipient&id=<?= $row['appointment_id']; ?>" 
+                        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientDelete.php?id=<?= $row['appointment_id']; ?>" 
                         class="action-btn delete-btn"
                         onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
@@ -239,12 +240,12 @@ th {
     <div class="section-divider"></div>
 
     <!-- ================= SELF STORAGE APPOINTMENTS ================= -->
-<div class="top-bar">
-    <h3>Self Storage Appointments</h3>
-    <a href="StaffAppointmentStorageCreate.php" class="create-btn">
-        + Add Storage Appointment
-    </a>
-</div>
+    <div class="top-bar">
+        <h3>Self Storage Appointments</h3>
+        <a href="StaffAppointmentStorageCreate.php" class="create-btn">
+            + Add Storage Appointment
+        </a>
+    </div>
 
     <table>
         <tr>
@@ -271,14 +272,15 @@ th {
                         ?>
                     </td>
                     <td>
-                        <a href="StaffAppointmentDonorUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentDelete.php?type=donor&id=<?= $row['appointment_id']; ?>" 
+                        <a href="StaffAppointmentStorageUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffAppointmentStorageDelete.php?id=<?= $row['appointment_id']; ?>" 
                         class="action-btn delete-btn"
                         onclick="return confirm('Are you sure?');">Delete</a>
+                    </td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="5">No storage appointments found.</td></tr>
+            <tr><td colspan="6">No storage appointments found.</td></tr>
         <?php endif; ?>
     </table>
 

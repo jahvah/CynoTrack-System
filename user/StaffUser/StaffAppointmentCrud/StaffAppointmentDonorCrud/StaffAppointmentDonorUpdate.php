@@ -3,25 +3,33 @@ session_start();
 include('../../../../includes/config.php');
 include('../../../../includes/header.php');
 
+// STAFF access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'staff') {
     header("Location: ../../../../unauthorized.php");
     exit();
 }
 
+// Check for appointment ID
 if (!isset($_GET['id'])) {
-    header("Location: StaffAppointmentIndex.php");
+    header("Location: ../StaffAppointmentIndex.php");
     exit();
 }
 
 $appointment_id = intval($_GET['id']);
 
-$stmt = $conn->prepare("SELECT appointment_date, status FROM appointments WHERE appointment_id = ? AND donor_id IS NOT NULL");
+// Fetch the donor appointment using new schema
+$stmt = $conn->prepare("
+    SELECT a.appointment_date, a.status, u.first_name, u.last_name
+    FROM appointments a
+    JOIN donors_users u ON a.user_id = u.donor_id
+    WHERE a.appointment_id = ? AND a.user_type = 'donor'
+");
 $stmt->bind_param("i", $appointment_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    header("Location: StaffAppointmentIndex.php");
+    header("Location: ../StaffAppointmentIndex.php");
     exit();
 }
 
@@ -72,8 +80,8 @@ button {
         <input type="hidden" name="action" value="update_donor_appointment">
         <input type="hidden" name="appointment_id" value="<?= $appointment_id; ?>">
 
-        <label>Appointment ID</label>
-        <input type="text" value="<?= $appointment_id; ?>" class="locked" disabled>
+        <label>Donor Name</label>
+        <input type="text" value="<?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']); ?>" class="locked" disabled>
 
         <label>Appointment Date & Time</label>
         <input type="datetime-local" name="appointment_date"

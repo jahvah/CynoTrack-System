@@ -46,7 +46,7 @@ if ($action === 'create_donor_appointment') {
     // 3️⃣ Check if donor already has an appointment that day
     $stmt_day = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE donor_id = ? AND DATE(appointment_date) = ?
+        WHERE user_type = 'donor' AND user_id = ? AND DATE(appointment_date) = ?
     ");
     $stmt_day->bind_param("is", $donor_id, $date_only);
     $stmt_day->execute();
@@ -63,21 +63,21 @@ if ($action === 'create_donor_appointment') {
 
     $stmt_hour = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE appointment_date BETWEEN ? AND ?
+        WHERE user_type = 'donor' AND appointment_date BETWEEN ? AND ?
     ");
     $stmt_hour->bind_param("ss", $start_hour, $end_hour);
     $stmt_hour->execute();
     $result_hour = $stmt_hour->get_result();
     if ($result_hour->num_rows > 0) {
-        $_SESSION['error'] = "This time slot is already booked. Please choose another hour.";
+        $_SESSION['error'] = "This time slot is already booked for a donor. Please choose another hour.";
         header("Location: StaffAppointmentDonorCreate.php");
         exit();
     }
 
     // ✅ Insert appointment if all checks pass
     $stmt = $conn->prepare("
-        INSERT INTO appointments (donor_id, appointment_date, type, status)
-        VALUES (?, ?, 'donation', ?)
+        INSERT INTO appointments (user_type, user_id, appointment_date, type, status)
+        VALUES ('donor', ?, ?, 'donation', ?)
     ");
     $stmt->bind_param("iss", $donor_id, $appointment_date, $status);
 
@@ -91,51 +91,78 @@ if ($action === 'create_donor_appointment') {
     exit();
 }
 
-
 // ================= UPDATE DONOR APPOINTMENT =================
 if ($action === 'update_donor_appointment') {
 
     $appointment_id = intval($_POST['appointment_id'] ?? 0);
-    $appointment_date = $_POST['appointment_date'] ?? '';
-    $status = $_POST['status'] ?? '';
+    $new_date = $_POST['appointment_date'] ?? '';
+    $new_status = $_POST['status'] ?? '';
 
-    if ($appointment_id <= 0 || empty($appointment_date)) {
+    if ($appointment_id <= 0 || empty($new_date)) {
         $_SESSION['error'] = "Invalid appointment or missing date.";
         header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
         exit();
     }
 
-    $appointment_datetime = strtotime($appointment_date);
+    // Fetch current appointment
+    $stmt_curr = $conn->prepare("
+        SELECT appointment_date, status 
+        FROM appointments 
+        WHERE appointment_id = ? AND user_type = 'donor'
+    ");
+    $stmt_curr->bind_param("i", $appointment_id);
+    $stmt_curr->execute();
+    $result_curr = $stmt_curr->get_result();
+
+    if ($result_curr->num_rows === 0) {
+        $_SESSION['error'] = "Appointment not found.";
+        header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
+        exit();
+    }
+
+    $current = $result_curr->fetch_assoc();
+
+    // Check if there are any actual changes
+    $current_date = date('Y-m-d H:i', strtotime($current['appointment_date']));
+    $new_date_normalized = date('Y-m-d H:i', strtotime($new_date));
+
+    if ($current_date === $new_date_normalized && $current['status'] === $new_status) {
+    $_SESSION['error'] = "No changes detected.";
+    header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
+    exit();
+}
+
+    // Proceed with the same validations as before (past date, operating hours, hourly conflict)
+    $appointment_datetime = strtotime($new_date);
     $now = time();
 
-    // 1️⃣ Cannot update to past date/time
     if ($appointment_datetime < $now) {
         $_SESSION['error'] = "Cannot set appointment for past date/time.";
         header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
         exit();
     }
 
-    // Extract hour
     $hour = intval(date('H', $appointment_datetime));
-
-    // 2️⃣ Operating hours 7am-7pm
     if ($hour < 7 || $hour >= 19) {
         $_SESSION['error'] = "Appointments can only be booked between 7:00 AM and 7:00 PM.";
         header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
         exit();
     }
 
-    // 3️⃣ Check if the hour is already booked by ANY OTHER appointment
+    // Check if the hour is already booked by another appointment
     $start_hour = date('Y-m-d H:00:00', $appointment_datetime);
     $end_hour   = date('Y-m-d H:59:59', $appointment_datetime);
 
     $stmt_hour = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE appointment_date BETWEEN ? AND ? AND appointment_id != ?
+        WHERE appointment_date BETWEEN ? AND ? 
+        AND appointment_id != ? 
+        AND user_type = 'donor'
     ");
     $stmt_hour->bind_param("ssi", $start_hour, $end_hour, $appointment_id);
     $stmt_hour->execute();
     $result_hour = $stmt_hour->get_result();
+
     if ($result_hour->num_rows > 0) {
         $_SESSION['error'] = "This time slot is already booked. Please choose another hour.";
         header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
@@ -146,9 +173,9 @@ if ($action === 'update_donor_appointment') {
     $stmt = $conn->prepare("
         UPDATE appointments
         SET appointment_date = ?, status = ?
-        WHERE appointment_id = ? AND donor_id IS NOT NULL
+        WHERE appointment_id = ? AND user_type = 'donor'
     ");
-    $stmt->bind_param("ssi", $appointment_date, $status, $appointment_id);
+    $stmt->bind_param("ssi", $new_date, $new_status, $appointment_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Donor appointment updated successfully.";
@@ -156,7 +183,6 @@ if ($action === 'update_donor_appointment') {
         $_SESSION['error'] = "Failed to update appointment.";
     }
 
-    // Redirect BACK to the update page with ID
     header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
     exit();
 }
