@@ -242,7 +242,7 @@ th {
     <!-- ================= SELF STORAGE APPOINTMENTS ================= -->
     <div class="top-bar">
         <h3>Self Storage Appointments</h3>
-        <a href="StaffAppointmentStorageCreate.php" class="create-btn">
+        <a href="StaffAppointmentSelfStorageCrud/StaffAppointmentSelfStorageCreate.php" class="create-btn">
             + Add Storage Appointment
         </a>
     </div>
@@ -272,8 +272,8 @@ th {
                         ?>
                     </td>
                     <td>
-                        <a href="StaffAppointmentStorageUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentStorageDelete.php?id=<?= $row['appointment_id']; ?>" 
+                        <a href="StaffAppointmentSelfStorageCrud/StaffAppointmentSelfStorageUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffAppointmentSelfStorageCrud/StaffAppointmentSelfStorageDelete.php?id=<?= $row['appointment_id']; ?>" 
                         class="action-btn delete-btn"
                         onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
