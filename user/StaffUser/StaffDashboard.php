@@ -10,7 +10,7 @@ if (!isset($_SESSION['account_id'])) {
     exit();
 }
 
-// Logged in but NOT admin
+// Logged in but NOT staff
 if ($_SESSION['role'] !== 'staff') {
     header("Location: ../../../unauthorized.php");
     exit();
@@ -45,11 +45,16 @@ if ($_SESSION['role'] !== 'staff') {
 </style>
 
 <div class="dashboard-container">
-    <h1 class="dashboard-title">Admin Dashboard</h1>
+    <h1 class="dashboard-title">Staff Dashboard</h1>
 
     <!-- SPECIMEN MANAGEMENT -->
     <a href="StaffSpecimenCrud/StaffSpecimenIndex.php" class="dashboard-btn">
         Manage Specimen
+    </a>
+
+    <!-- APPOINTMENT MANAGEMENT -->
+    <a href="StaffAppointmentCrud/StaffAppointmentIndex.php" class="dashboard-btn">
+        Manage Appointments
     </a>
 
 </div>
