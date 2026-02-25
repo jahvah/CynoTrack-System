@@ -1,7 +1,7 @@
-<?php
+<?php 
 session_start();
-include('../../../includes/config.php');
-include('../../../includes/header.php');
+include('../../../../includes/config.php');
+include('../../../../includes/header.php');
 
 // STAFF access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'staff') {
@@ -9,11 +9,16 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'staff') {
     exit();
 }
 
-// Fetch self-storage users for the search array
-$storage_result = mysqli_query($conn, "SELECT storage_user_id, first_name, last_name FROM self_storage_users ORDER BY first_name ASC");
-$users = [];
+// Fetch self storage users
+$storage_result = mysqli_query($conn, "
+    SELECT storage_user_id, first_name, last_name 
+    FROM self_storage_users 
+    ORDER BY first_name ASC
+");
+
+$storage_users = [];
 while ($row = mysqli_fetch_assoc($storage_result)) {
-    $users[] = $row;
+    $storage_users[] = $row;
 }
 ?>
 
@@ -43,7 +48,7 @@ button {
 }
 .back-btn:hover { background: #333; }
 
-/* Search Results Styling - Matching Donor Design */
+/* Search Results Styling */
 .search-container { position: relative; }
 #search-results {
     position: absolute;
@@ -66,8 +71,8 @@ button {
 </style>
 
 <div class="container">
-    <a href="StaffSpecimenIndex.php" class="back-btn">← Back to Specimen Dashboard</a>
-    <h2>Add Self-Storage Specimen</h2>
+    <a href="../StaffSpecimenIndex.php" class="back-btn">← Back to Specimen Dashboard</a>
+    <h2>Add Self Storage Specimen</h2>
 
     <?php if (isset($_SESSION['error'])): ?>
         <div class="message error"><?= $_SESSION['error']; ?></div>
@@ -79,37 +84,37 @@ button {
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
-    <form action="StaffSpecimenStore.php" method="POST" autocomplete="off">
-    <input type="hidden" name="action" value="create_storage_specimen">
+    <form action="StaffSpecimenSelfStorageStore.php" method="POST" autocomplete="off">
+        <input type="hidden" name="action" value="create_self_storage_specimen">
 
-    <label>Search Self-Storage User</label>
-    <div class="search-container">
-        <input type="text" id="user_search_input" placeholder="Type name to search storage users..." required>
-        <input type="hidden" name="storage_user_id" id="storage_user_id_hidden" required>
-        <div id="search-results"></div>
-    </div>
+        <label>Self Storage User Search</label>
+        <div class="search-container">
+            <input type="text" id="storage_search_input" placeholder="Type name to search users..." required>
+            <input type="hidden" name="storage_user_id" id="storage_user_id_hidden" required>
+            <div id="search-results"></div>
+        </div>
 
-    <label>Unique Code</label>
-    <input type="text" name="unique_code" required>
+        <label>Unique Code</label>
+        <input type="text" name="unique_code" required>
 
-    <label>Quantity</label>
-    <input type="number" name="quantity" min="1" required>
+        <label>Quantity</label>
+        <input type="number" name="quantity" min="1" required>
 
-    <label>Storage Location</label>
-    <input type="text" name="storage_location" required>
+        <label>Storage Location</label>
+        <input type="text" name="storage_location" required>
 
-    <label>Expiration Date</label>
-    <input type="date" name="expiration_date" required>
+        <label>Expiration Date</label>
+        <input type="date" name="expiration_date" required>
 
-    <button type="submit">Add Storage Specimen</button>
-</form>
+        <button type="submit">Add Self Storage Specimen</button>
+    </form>
 </div>
 
 <script>
-// Pass PHP user array to JS
-const storageUsers = <?php echo json_encode($users); ?>;
+// Pass PHP array to JavaScript
+const storageUsers = <?php echo json_encode($storage_users); ?>;
 
-const searchInput = document.getElementById('user_search_input');
+const searchInput = document.getElementById('storage_search_input');
 const resultsDiv = document.getElementById('search-results');
 const hiddenIdInput = document.getElementById('storage_user_id_hidden');
 
@@ -143,7 +148,7 @@ searchInput.addEventListener('input', function() {
     }
 });
 
-// Hide results when clicking outside
+// Close list if user clicks outside
 document.addEventListener('click', function(e) {
     if (e.target !== searchInput) {
         resultsDiv.style.display = 'none';
@@ -151,4 +156,4 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
-<?php include('../../../includes/footer.php'); ?>
+<?php include('../../../../includes/footer.php'); ?>

@@ -9,34 +9,28 @@ if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'staff') {
     exit();
 }
 
-// fetch donor specimens linked with donor names
-$donor_query = "SELECT 
-            ds.specimen_id,
-            ds.unique_code,
-            ds.quantity,
-            ds.status,
-            ds.storage_location,
-            ds.expiration_date,
-            d.first_name,
-            d.last_name
-          FROM donor_specimens ds
-          JOIN donors_users d ON ds.donor_id = d.donor_id
-          ORDER BY ds.specimen_id DESC";
+// Fetch donor specimens
+$donor_query = "
+    SELECT s.*,
+           d.first_name,
+           d.last_name
+    FROM specimens s
+    JOIN donors_users d
+         ON s.specimen_owner_type = 'donor' AND s.specimen_owner_id = d.donor_id
+    ORDER BY s.specimen_id DESC
+";
 $donor_result = mysqli_query($conn, $donor_query);
 
-// fetch storage specimens linked with self-storage user names
-$storage_query = "SELECT 
-            ss.specimen_id,
-            ss.unique_code,
-            ss.quantity,
-            ss.status,
-            ss.storage_location,
-            ss.expiration_date,
-            su.first_name,
-            su.last_name
-          FROM storage_specimens ss
-          JOIN self_storage_users su ON ss.storage_user_id = su.storage_user_id
-          ORDER BY ss.specimen_id DESC";
+// Fetch self-storage specimens
+$storage_query = "
+    SELECT s.*,
+           su.first_name,
+           su.last_name
+    FROM specimens s
+    JOIN self_storage_users su
+         ON s.specimen_owner_type = 'storage' AND s.specimen_owner_id = su.storage_user_id
+    ORDER BY s.specimen_id DESC
+";
 $storage_result = mysqli_query($conn, $storage_query);
 ?>
 
@@ -70,10 +64,12 @@ th, td {
     text-align: center;
 }
 
-th {
-    background: #007bff;
-    color: white;
-}
+th { background: #007bff; color: white; }
+
+.message { padding: 12px; margin-bottom: 15px; border-radius: 5px; }
+.error { background:#f8d7da; color:#721c24; }
+.success { background:#d4edda; color:#155724; }
+
 
 .action-btn {
     padding: 6px 10px;
@@ -106,9 +102,7 @@ th {
     margin-right: 10px;
 }
 
-.back-btn:hover {
-    background: #333;
-}
+.back-btn:hover { background: #333; }
 
 .section-divider {
     margin-top: 40px;
@@ -119,6 +113,15 @@ th {
 
 <div class="container">
 
+       <?php if (isset($_SESSION['error'])): ?>
+        <div class="message error"><?= $_SESSION['error']; ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="message success"><?= $_SESSION['success']; ?></div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
     <div class="top-bar">
         <h2>Specimen Management</h2>
         <div>
@@ -126,9 +129,10 @@ th {
         </div>
     </div>
 
+    <!-- Donor Specimens Section -->
     <div class="top-bar" style="margin-top: 20px;">
         <h3>Donor Specimens</h3>
-        <a href="StaffSpecimenDonorCreate.php" class="create-btn">+ Add Donor Specimen</a>
+        <a href="StaffSpecimenDonorCrud/StaffSpecimenDonorCreate.php" class="create-btn">+ Add Donor Specimen</a>
     </div>
 
     <table>
@@ -155,15 +159,15 @@ th {
                         $status = $row['status'];
                         $class = 'yellow';
                         if ($status == 'approved' || $status == 'stored') $class = 'green';
-                        if ($status == 'expired' || $status == 'disposed') $class = 'red';
+                        if ($status == 'expired' || $status == 'disposed' || $status == 'disapproved') $class = 'red';
                         echo "<span class='badge $class'>" . ucfirst($status) . "</span>";
                         ?>
                     </td>
                     <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
                     <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
                     <td>
-                        <a href="StaffSpecimenDonorUpdate.php?type=donor&id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffSpecimenDelete.php?type=donor&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
+                        <a href="StaffSpecimenDonorCrud/StaffSpecimenDonorUpdate.php?id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffSpecimenDonorCrud/StaffSpecimenDonorDelete.php?type=donor&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -174,9 +178,10 @@ th {
 
     <div class="section-divider"></div>
 
+    <!-- Self-Storage Specimens Section -->
     <div class="top-bar">
         <h3>Self-Storage Specimens</h3>
-        <a href="StaffSpecimenStorageCreate.php" class="create-btn">+ Add Storage Specimen</a>
+        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageCreate.php" class="create-btn">+ Add Storage Specimen</a>
     </div>
 
     <table>
@@ -201,15 +206,17 @@ th {
                     <td>
                         <?php
                         $status = $row['status'];
-                        $class = ($status == 'stored') ? 'green' : (($status == 'used') ? 'yellow' : 'red');
+                        $class = 'yellow';
+                        if ($status == 'stored' || $status == 'approved') $class = 'green';
+                        if ($status == 'used' || $status == 'expired' || $status == 'disposed' || $status == 'disapproved') $class = 'red';
                         echo "<span class='badge $class'>" . ucfirst($status) . "</span>";
                         ?>
                     </td>
                     <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
                     <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
                     <td>
-                        <a href="StaffSpecimenStorageUpdate.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffSpecimenDelete.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
+                        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageUpdate.php?id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageDelete.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
                 </tr>
             <?php endwhile; ?>

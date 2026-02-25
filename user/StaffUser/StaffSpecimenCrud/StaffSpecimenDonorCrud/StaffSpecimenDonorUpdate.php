@@ -1,10 +1,10 @@
 <?php
 session_start();
-include('../../../includes/config.php');
-include('../../../includes/header.php');
+include('../../../../includes/config.php');
+include('../../../../includes/header.php');
 
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'staff') {
-    header("Location: ../../../unauthorized.php");
+    header("Location: ../../../../unauthorized.php");
     exit();
 }
 
@@ -15,7 +15,8 @@ if (!isset($_GET['id'])) {
 
 $specimen_id = intval($_GET['id']);
 
-$stmt = $conn->prepare("SELECT unique_code FROM storage_specimens WHERE specimen_id = ?");
+// Updated query to use unified specimens table for donors
+$stmt = $conn->prepare("SELECT unique_code FROM specimens WHERE specimen_id = ? AND specimen_owner_type = 'donor'");
 $stmt->bind_param("i", $specimen_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -33,12 +34,7 @@ $specimen = $result->fetch_assoc();
 form { max-width: 500px; margin: auto; }
 label, select { display: block; margin-top: 15px; }
 input, select { width: 100%; padding: 10px; margin: 10px 0; }
-button {
-    padding: 10px 15px;
-    background: green;
-    color: white;
-    border: none;
-}
+button { padding: 10px 15px; background: green; color: white; border: none; }
 .locked { background:#eee; }
 .error { background:#f8d7da; color:#721c24; padding:10px; }
 .success { background:#d4edda; color:#155724; padding:10px; }
@@ -56,7 +52,7 @@ button {
 </style>
 
 <div class="container">
-    <h2>Update Storage Specimen</h2>
+    <h2>Update Donor Specimen</h2>
 
     <?php if (isset($_SESSION['error'])): ?>
         <div class="error"><?= $_SESSION['error']; ?></div>
@@ -68,8 +64,8 @@ button {
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
-    <form action="StaffSpecimenStore.php" method="POST">
-        <input type="hidden" name="action" value="update_storage_specimen">
+    <form action="StaffSpecimenDonorStore.php" method="POST">
+        <input type="hidden" name="action" value="update_donor_specimen">
         <input type="hidden" name="specimen_id" value="<?= $specimen_id; ?>">
 
         <label>Unique Code</label>
@@ -77,7 +73,7 @@ button {
         <input type="hidden" name="unique_code" value="<?= htmlspecialchars($specimen['unique_code']); ?>">
 
         <label>Quantity</label>
-        <input type="number" name="quantity" min="1">
+        <input type="number" name="quantity" min="0">
 
         <label>Status</label>
         <select name="status">
@@ -96,9 +92,9 @@ button {
         <label>Expiration Date</label>
         <input type="date" name="expiration_date">
 
-        <button type="submit">Update Storage Specimen</button>
-        <a href="StaffSpecimenIndex.php" class="back-btn">← Back to Index</a>
+        <button type="submit">Update Donor Specimen</button>
+        <a href="../StaffSpecimenIndex.php" class="back-btn">← Back to Index</a>
     </form>
 </div>
 
-<?php include('../../../includes/footer.php'); ?>
+<?php include('../../../../includes/footer.php'); ?>

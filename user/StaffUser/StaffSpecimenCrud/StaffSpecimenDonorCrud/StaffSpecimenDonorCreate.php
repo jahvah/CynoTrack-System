@@ -1,7 +1,7 @@
-<?php
+<?php 
 session_start();
-include('../../../includes/config.php');
-include('../../../includes/header.php');
+include('../../../../includes/config.php');
+include('../../../../includes/header.php');
 
 // STAFF access only
 if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'staff') {
@@ -66,7 +66,7 @@ button {
 </style>
 
 <div class="container">
-    <a href="StaffSpecimenIndex.php" class="back-btn">← Back to Specimen Dashboard</a>
+    <a href="../StaffSpecimenIndex.php" class="back-btn">← Back to Specimen Dashboard</a>
     <h2>Add Donor Specimen</h2>
 
     <?php if (isset($_SESSION['error'])): ?>
@@ -79,30 +79,30 @@ button {
         <?php unset($_SESSION['success']); ?>
     <?php endif; ?>
 
-    <form action="StaffSpecimenStore.php" method="POST" autocomplete="off">
-    <input type="hidden" name="action" value="create_donor_specimen">
+    <form action="StaffSpecimenDonorStore.php" method="POST" autocomplete="off">
+        <input type="hidden" name="action" value="create_donor_specimen">
 
-    <label>Donor Search</label>
-    <div class="search-container">
-        <input type="text" id="donor_search_input" placeholder="Type name to search donors..." required>
-        <input type="hidden" name="donor_id" id="donor_id_hidden" required>
-        <div id="search-results"></div>
-    </div>
+        <label>Donor Search</label>
+        <div class="search-container">
+            <input type="text" id="donor_search_input" placeholder="Type name to search donors..." required>
+            <input type="hidden" name="donor_id" id="donor_id_hidden" required>
+            <div id="search-results"></div>
+        </div>
 
-    <label>Unique Code</label>
-    <input type="text" name="unique_code" required>
+        <label>Unique Code</label>
+        <input type="text" name="unique_code" required>
 
-    <label>Quantity</label>
-    <input type="number" name="quantity" min="1" required>
+        <label>Quantity</label>
+        <input type="number" name="quantity" min="1" required>
 
-    <label>Storage Location</label>
-    <input type="text" name="storage_location" required>
+        <label>Storage Location</label>
+        <input type="text" name="storage_location" required>
 
-    <label>Expiration Date</label>
-    <input type="date" name="expiration_date" required>
+        <label>Expiration Date</label>
+        <input type="date" name="expiration_date" required>
 
-    <button type="submit">Add Donor Specimen</button>
-</form>
+        <button type="submit">Add Donor Specimen</button>
+    </form>
 </div>
 
 <script>
@@ -151,4 +151,4 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
-<?php include('../../../includes/footer.php'); ?>   
+<?php include('../../../../includes/footer.php'); ?>
