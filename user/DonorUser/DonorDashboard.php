@@ -50,7 +50,6 @@ if ($donor['account_status'] !== 'active') {
 }
 ?>
 
-?>
 
 <div class="container mt-5">
     <div class="card shadow-sm">

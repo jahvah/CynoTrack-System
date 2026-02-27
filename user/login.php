@@ -1,6 +1,5 @@
 <?php 
 session_start(); // MUST be at the very top
-include('../includes/header.php'); 
 include('../includes/alert.php'); 
 ?>
 
