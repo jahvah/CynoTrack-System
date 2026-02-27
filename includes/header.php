@@ -33,7 +33,10 @@ $role = $_SESSION['role']; // 'admin' or 'staff'
                     <a href="StaffAppointmentCrud/StaffAppointmentIndex.php">Appointments</a>
                 <?php elseif ($role === 'donor'): ?>
                     <a href="DonorAppointmentCrud/DonorAppointmentIndex.php">My Appointments</a></li>
+                <?php elseif ($role === 'recipient'): ?>
+                    <a href="RecipientAppointmentCrud/RecipientAppointmentIndex.php">My Appointments</a></li>
                 <?php endif; ?>
+                
                 <a href="/cynotrack/user/logout.php">Logout</a>
             </ul>
         </nav>
