@@ -25,10 +25,19 @@ if ($result_storage->num_rows === 0) {
 $storage_user_id = $result_storage->fetch_assoc()['storage_user_id'];
 
 
-// ================= CREATE STORAGE APPOINTMENT =================
+/// ================= CREATE SELF-STORAGE APPOINTMENT =================
 if ($action === 'create_storage_appointment') {
 
     $appointment_date = $_POST['appointment_date'] ?? '';
+    $type = $_POST['type'] ?? '';
+
+    // ✅ Validate type
+    $allowed_types = ['storage', 'release'];
+    if (!in_array($type, $allowed_types)) {
+        $_SESSION['error'] = "Invalid appointment type selected.";
+        header("Location: SelfStorageAppointmentCreate.php");
+        exit();
+    }
 
     if (empty($appointment_date)) {
         $_SESSION['error'] = "Please select appointment date.";
@@ -59,7 +68,9 @@ if ($action === 'create_storage_appointment') {
     // 3️⃣ One appointment per day per storage user
     $stmt_day = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE user_type = 'storage' AND user_id = ? AND DATE(appointment_date) = ?
+        WHERE user_type = 'storage' 
+        AND user_id = ? 
+        AND DATE(appointment_date) = ?
     ");
     $stmt_day->bind_param("is", $storage_user_id, $date_only);
     $stmt_day->execute();
@@ -69,13 +80,14 @@ if ($action === 'create_storage_appointment') {
         exit();
     }
 
-    // 4️⃣ Hour conflict check
+    // 4️⃣ Hour conflict check (global per storage type)
     $start_hour = date('Y-m-d H:00:00', $appointment_datetime);
     $end_hour   = date('Y-m-d H:59:59', $appointment_datetime);
 
     $stmt_hour = $conn->prepare("
         SELECT * FROM appointments 
-        WHERE user_type = 'storage' AND appointment_date BETWEEN ? AND ?
+        WHERE user_type = 'storage' 
+        AND appointment_date BETWEEN ? AND ?
     ");
     $stmt_hour->bind_param("ss", $start_hour, $end_hour);
     $stmt_hour->execute();
@@ -85,12 +97,12 @@ if ($action === 'create_storage_appointment') {
         exit();
     }
 
-    // ✅ Insert (status defaults to 'scheduled')
+    // ✅ Insert with selected type
     $stmt = $conn->prepare("
         INSERT INTO appointments (user_type, user_id, appointment_date, type)
-        VALUES ('storage', ?, ?, 'storage')
+        VALUES ('storage', ?, ?, ?)
     ");
-    $stmt->bind_param("is", $storage_user_id, $appointment_date);
+    $stmt->bind_param("iss", $storage_user_id, $appointment_date, $type);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Appointment created successfully.";
@@ -101,7 +113,6 @@ if ($action === 'create_storage_appointment') {
     header("Location: SelfStorageAppointmentIndex.php");
     exit();
 }
-
 
 // ================= UPDATE STORAGE APPOINTMENT =================
 if ($action === 'update_storage_appointment') {

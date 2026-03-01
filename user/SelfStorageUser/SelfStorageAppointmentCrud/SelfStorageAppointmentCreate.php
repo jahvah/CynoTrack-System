@@ -26,7 +26,14 @@ $storage_user_id = $storage_data['storage_user_id'];
 <style>
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+input, select { 
+    width: 100%; 
+    padding: 10px; 
+    margin: 10px 0; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    box-sizing: border-box; 
+}
 button {
     padding: 10px 15px;
     background: green;
@@ -52,7 +59,7 @@ button {
 
 <div class="container">
     <a href="SelfStorageAppointmentIndex.php" class="back-btn">← Back to Appointment Dashboard</a>
-    <h2>Create Storage Appointment</h2>
+    <h2>Create Appointment</h2>
 
     <?php if (isset($_SESSION['error'])): ?>
         <div class="message error"><?= $_SESSION['error']; ?></div>
@@ -67,6 +74,13 @@ button {
     <form action="SelfStorageAppointmentStore.php" method="POST">
         <input type="hidden" name="action" value="create_storage_appointment">
         <input type="hidden" name="storage_user_id" value="<?= $storage_user_id; ?>">
+
+        <label>Appointment Type</label>
+        <select name="type" required>
+            <option value="">-- Select Appointment Type --</option>
+            <option value="storage">Storage</option>
+            <option value="release">Release</option>
+        </select>
 
         <label>Appointment Date & Time</label>
         <input type="datetime-local" name="appointment_date" required>
