@@ -24,19 +24,11 @@ if ($result_recipient->num_rows === 0) {
 
 $recipient_id = $result_recipient->fetch_assoc()['recipient_id'];
 
-/// ================= CREATE RECIPIENT APPOINTMENT =================
+
+// ================= CREATE RECIPIENT APPOINTMENT =================
 if ($action === 'create_recipient_appointment') {
 
     $appointment_date = $_POST['appointment_date'] ?? '';
-    $type = $_POST['type'] ?? '';
-
-    // ✅ Validate type
-    $allowed_types = ['consultation', 'release'];
-    if (!in_array($type, $allowed_types)) {
-        $_SESSION['error'] = "Invalid appointment type selected.";
-        header("Location: RecipientAppointmentCreate.php");
-        exit();
-    }
 
     if (empty($appointment_date)) {
         $_SESSION['error'] = "Please select appointment date.";
@@ -44,10 +36,19 @@ if ($action === 'create_recipient_appointment') {
         exit();
     }
 
-    $appointment_datetime = strtotime($appointment_date);
+    $appointment_datetime = strtotime($appointment_date); 
     $now = time();
+    $today_date = date('Y-m-d', $now);
+    $date_only = date('Y-m-d', $appointment_datetime);
 
-    // 1️⃣ Past date/time check
+    // 1️⃣ Cannot book for today
+    if ($date_only === $today_date) {
+        $_SESSION['error'] = "You cannot create an appointment for the current date.";
+        header("Location: RecipientAppointmentCreate.php");
+        exit();
+    }
+
+    // 2️⃣ Past date/time check
     if ($appointment_datetime < $now) {
         $_SESSION['error'] = "Cannot create appointment for past date/time.";
         header("Location: RecipientAppointmentCreate.php");
@@ -55,53 +56,36 @@ if ($action === 'create_recipient_appointment') {
     }
 
     $hour = intval(date('H', $appointment_datetime));
-    $date_only = date('Y-m-d', $appointment_datetime);
 
-    // 2️⃣ Operating hours check
+    // 3️⃣ Operating hours check
     if ($hour < 7 || $hour >= 19) {
         $_SESSION['error'] = "Appointments allowed only between 7:00 AM and 7:00 PM.";
         header("Location: RecipientAppointmentCreate.php");
         exit();
     }
 
-    // 3️⃣ One appointment per day per recipient
-    $stmt_day = $conn->prepare("
-        SELECT * FROM appointments 
+    // 4️⃣ Check for any upcoming appointment (excluding cancelled ones)
+    $stmt_upcoming = $conn->prepare("
+        SELECT * FROM appointments
         WHERE user_type = 'recipient' 
-        AND user_id = ? 
-        AND DATE(appointment_date) = ?
+          AND user_id = ? 
+          AND appointment_date > NOW() 
+          AND status != 'cancelled'
     ");
-    $stmt_day->bind_param("is", $recipient_id, $date_only);
-    $stmt_day->execute();
-    if ($stmt_day->get_result()->num_rows > 0) {
-        $_SESSION['error'] = "You already have an appointment for this day.";
+    $stmt_upcoming->bind_param("i", $recipient_id);
+    $stmt_upcoming->execute();
+    if ($stmt_upcoming->get_result()->num_rows > 0) {
+        $_SESSION['error'] = "You already have an upcoming appointment.";
         header("Location: RecipientAppointmentCreate.php");
         exit();
     }
 
-    // 4️⃣ Hour conflict check (global per recipient type)
-    $start_hour = date('Y-m-d H:00:00', $appointment_datetime);
-    $end_hour   = date('Y-m-d H:59:59', $appointment_datetime);
-
-    $stmt_hour = $conn->prepare("
-        SELECT * FROM appointments 
-        WHERE user_type = 'recipient' 
-        AND appointment_date BETWEEN ? AND ?
-    ");
-    $stmt_hour->bind_param("ss", $start_hour, $end_hour);
-    $stmt_hour->execute();
-    if ($stmt_hour->get_result()->num_rows > 0) {
-        $_SESSION['error'] = "This time slot is already booked.";
-        header("Location: RecipientAppointmentCreate.php");
-        exit();
-    }
-
-    // ✅ Insert with selected type
+    // ✅ Insert appointment
     $stmt = $conn->prepare("
         INSERT INTO appointments (user_type, user_id, appointment_date, type)
-        VALUES ('recipient', ?, ?, ?)
+        VALUES ('recipient', ?, ?, 'consultation')
     ");
-    $stmt->bind_param("iss", $recipient_id, $appointment_date, $type);
+    $stmt->bind_param("is", $recipient_id, $appointment_date);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Appointment created successfully.";
