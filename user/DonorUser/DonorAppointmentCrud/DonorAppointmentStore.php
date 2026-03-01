@@ -154,24 +154,22 @@ if ($action === 'update_donor_appointment') {
         exit();
     }
 
-    // Hour conflict check (excluding current appointment)
-    $start_hour = date('Y-m-d H:00:00', $appointment_datetime);
-    $end_hour   = date('Y-m-d H:59:59', $appointment_datetime);
+    // Hour conflict check (excluding current appointment and cancelled appointments)
+$stmt_hour = $conn->prepare("
+    SELECT * FROM appointments 
+    WHERE appointment_date BETWEEN ? AND ?
+    AND appointment_id != ?
+    AND user_type = 'donor'
+    AND status != 'cancelled'
+");
+$stmt_hour->bind_param("ssi", $start_hour, $end_hour, $appointment_id);
+$stmt_hour->execute();
 
-    $stmt_hour = $conn->prepare("
-        SELECT * FROM appointments 
-        WHERE appointment_date BETWEEN ? AND ?
-        AND appointment_id != ?
-        AND user_type = 'donor'
-    ");
-    $stmt_hour->bind_param("ssi", $start_hour, $end_hour, $appointment_id);
-    $stmt_hour->execute();
-
-    if ($stmt_hour->get_result()->num_rows > 0) {
-        $_SESSION['error'] = "This time slot is already booked.";
-        header("Location: DonorAppointmentUpdate.php?id=" . $appointment_id);
-        exit();
-    }
+if ($stmt_hour->get_result()->num_rows > 0) {
+    $_SESSION['error'] = "This time slot is already booked.";
+    header("Location: DonorAppointmentUpdate.php?id=" . $appointment_id);
+    exit();
+}
 
     // ✅ Update (status NOT changed by donor)
     $stmt = $conn->prepare("

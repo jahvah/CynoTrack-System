@@ -4,7 +4,7 @@ include('../../../includes/config.php');
 include('../../../includes/header.php');
 
 // SELF-STORAGE access only
-if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'storage') {
+if (!isset($_SESSION['account_id']) || $_SESSION['role'] !== 'self-gitstorage') {
     header("Location: ../../../unauthorized.php");
     exit();
 }
