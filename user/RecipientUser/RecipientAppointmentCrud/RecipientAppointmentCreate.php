@@ -26,7 +26,14 @@ $recipient_id = $recipient_data['recipient_id'];
 <style>
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+input, select { 
+    width: 100%; 
+    padding: 10px; 
+    margin: 10px 0; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    box-sizing: border-box; 
+}
 button {
     padding: 10px 15px;
     background: green;
@@ -67,6 +74,13 @@ button {
     <form action="RecipientAppointmentStore.php" method="POST">
         <input type="hidden" name="action" value="create_recipient_appointment">
         <input type="hidden" name="recipient_id" value="<?= $recipient_id; ?>">
+
+        <label>Appointment Type</label>
+        <select name="type" required>
+            <option value="">-- Select Appointment Type --</option>
+            <option value="consultation">Consultation</option>
+            <option value="release">Release</option>
+        </select>
 
         <label>Appointment Date & Time</label>
         <input type="datetime-local" name="appointment_date" required>

@@ -34,7 +34,7 @@ $recipient_id = $recipient_data['recipient_id'];
 
 // Fetch ONLY this recipient's appointment
 $stmt = $conn->prepare("
-    SELECT appointment_date, status
+    SELECT appointment_date, status, type
     FROM appointments
     WHERE appointment_id = ? 
       AND user_type = 'recipient'
@@ -56,7 +56,7 @@ $appointment = $result->fetch_assoc();
 .container { padding: 30px; }
 form { max-width: 500px; margin: auto; }
 label { display: block; margin-top: 15px; }
-input { width: 100%; padding: 10px; margin: 10px 0; }
+input, select { width: 100%; padding: 10px; margin: 10px 0; }
 button {
     padding: 10px 15px;
     background: green;
@@ -103,6 +103,16 @@ button {
                class="locked" 
                disabled>
 
+        <label>Appointment Type</label>
+        <select class="locked" disabled>
+            <option value="consultation" <?= ($appointment['type'] === 'consultation') ? 'selected' : ''; ?>>
+                Consultation
+            </option>
+            <option value="release" <?= ($appointment['type'] === 'release') ? 'selected' : ''; ?>>
+                Release
+            </option>
+        </select>
+
         <label>Appointment Date & Time</label>
         <input type="datetime-local" 
                name="appointment_date"
@@ -111,9 +121,9 @@ button {
 
         <label>Appointment Status</label>
         <input type="text" 
-                value="<?= ucfirst(htmlspecialchars($appointment['status'])); ?>" 
-                class="locked" 
-                disabled>
+               value="<?= ucfirst(htmlspecialchars($appointment['status'])); ?>" 
+               class="locked" 
+               disabled>
 
         <button type="submit">Update Appointment</button>
         <br>
