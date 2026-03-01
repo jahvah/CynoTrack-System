@@ -155,16 +155,20 @@ th {
                         ?>
                     </td>
                     <td>
-                        <a href="SelfStorageAppointmentUpdate.php?id=<?= $row['appointment_id']; ?>" 
-                           class="action-btn edit-btn">Edit</a>
+    <?php if ($status === 'scheduled'): ?>
+        <a href="DonorAppointmentUpdate.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn edit-btn">Edit</a>
 
-                        <a href="SelfStorageAppointmentDelete.php?id=<?= $row['appointment_id']; ?>" 
-                           class="action-btn delete-btn"
-                           onclick="return confirm('Are you sure you want to delete this appointment?');">
-                           Delete
-                        </a>
-                    </td>
-                </tr>
+        <a href="DonorAppointmentDelete.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn delete-btn"
+           onclick="return confirm('Are you sure you want to delete this appointment?');">
+           Delete
+        </a>
+    <?php else: ?>
+        <!-- No actions for cancelled or completed appointments -->
+        -
+    <?php endif; ?>
+</td>                </tr>
             <?php endwhile; ?>
         <?php else: ?>
             <tr><td colspan="5">No appointments found.</td></tr>
