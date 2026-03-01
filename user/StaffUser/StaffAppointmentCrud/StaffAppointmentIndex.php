@@ -177,11 +177,20 @@ th {
                         ?>
                     </td>
                     <td>
-                        <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorDelete.php?id=<?= $row['appointment_id']; ?>" 
-                           class="action-btn delete-btn"
-                           onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
+    <?php if ($status === 'scheduled'): ?>
+        <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorUpdate.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn edit-btn">Edit</a>
+
+        <a href="StaffAppointmentDonorCrud/StaffAppointmentDonorDelete.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn delete-btn"
+           onclick="return confirm('Are you sure you want to delete this appointment?');">
+           Delete
+        </a>
+    <?php else: ?>
+        <!-- No actions for cancelled or completed appointments -->
+        -
+    <?php endif; ?>
+</td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
@@ -225,11 +234,20 @@ th {
                     </td>
 
                     <td>
-                        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientDelete.php?id=<?= $row['appointment_id']; ?>" 
-                        class="action-btn delete-btn"
-                        onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
+    <?php if ($status === 'scheduled'): ?>
+        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientUpdate.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn edit-btn">Edit</a>
+
+        <a href="StaffAppointmentRecipientCrud/StaffAppointmentRecipientDelete.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn delete-btn"
+           onclick="return confirm('Are you sure you want to delete this appointment?');">
+           Delete
+        </a>
+    <?php else: ?>
+        <!-- No actions for cancelled or completed appointments -->
+        -
+    <?php endif; ?>
+</td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
@@ -271,12 +289,21 @@ th {
                         echo "<span class='badge $class'>" . ucfirst($status) . "</span>";
                         ?>
                     </td>
-                    <td>
-                        <a href="StaffAppointmentSelfStorageCrud/StaffAppointmentSelfStorageUpdate.php?id=<?= $row['appointment_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffAppointmentSelfStorageCrud/StaffAppointmentSelfStorageDelete.php?id=<?= $row['appointment_id']; ?>" 
-                        class="action-btn delete-btn"
-                        onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
+                    <<td>
+    <?php if ($status === 'scheduled'): ?>
+        <a href="DonorAppointmentUpdate.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn edit-btn">Edit</a>
+
+        <a href="DonorAppointmentDelete.php?id=<?= $row['appointment_id']; ?>" 
+           class="action-btn delete-btn"
+           onclick="return confirm('Are you sure you want to delete this appointment?');">
+           Delete
+        </a>
+    <?php else: ?>
+        <!-- No actions for cancelled or completed appointments -->
+        -
+    <?php endif; ?>
+</td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
