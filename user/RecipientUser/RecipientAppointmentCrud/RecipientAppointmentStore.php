@@ -71,6 +71,7 @@ if ($action === 'create_recipient_appointment') {
           AND user_id = ? 
           AND appointment_date > NOW() 
           AND status != 'cancelled'
+          AND status != 'completed'
     ");
     $stmt_upcoming->bind_param("i", $recipient_id);
     $stmt_upcoming->execute();
@@ -161,6 +162,7 @@ $stmt_hour = $conn->prepare("
     AND appointment_id != ?
     AND user_type = 'recipient'
     AND status != 'cancelled'
+    AND status != 'completed'
 ");
 $stmt_hour->bind_param("ssi", $start_hour, $end_hour, $appointment_id);
 $stmt_hour->execute();
