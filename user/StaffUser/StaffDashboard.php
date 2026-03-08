@@ -57,7 +57,7 @@ if ($_SESSION['role'] !== 'staff') {
         Manage Appointments
     </a>
 
-    <a href="StaffSpecimenRequestCrud/StaffSpecimenRequestRecipientIndex.php" class="dashboard-btn">
+    <a href="StaffSpecimenRequestCrud/StaffSpecimenRequestIndex.php" class="dashboard-btn">
         Manage Specimen Requests
     </a>
 
