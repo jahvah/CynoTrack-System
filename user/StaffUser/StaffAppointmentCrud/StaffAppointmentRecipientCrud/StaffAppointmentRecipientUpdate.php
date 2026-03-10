@@ -19,7 +19,7 @@ $appointment_id = intval($_GET['id']);
 
 // Fetch the recipient appointment
 $stmt = $conn->prepare("
-    SELECT a.appointment_date, a.status, u.first_name, u.last_name
+    SELECT a.appointment_date, a.status, a.type, u.first_name, u.last_name
     FROM appointments a
     JOIN recipients_users u ON a.user_id = u.recipient_id
     WHERE a.appointment_id = ? AND a.user_type = 'recipient'
@@ -86,6 +86,13 @@ button {
         <label>Appointment Date & Time</label>
         <input type="datetime-local" name="appointment_date"
             value="<?= date('Y-m-d\TH:i', strtotime($appointment['appointment_date'])); ?>">
+
+
+            <label>Appointment Type</label>
+<select name="appointment_type" required>
+    <option value="consultation" <?= $appointment['type']=='consultation'?'selected':'' ?>>Consultation</option>
+    <option value="release" <?= $appointment['type']=='release'?'selected':'' ?>>Release</option>
+</select>
 
         <label>Status</label>
         <select name="status">

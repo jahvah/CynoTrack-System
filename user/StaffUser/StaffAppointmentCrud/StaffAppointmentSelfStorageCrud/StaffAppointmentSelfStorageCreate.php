@@ -98,6 +98,13 @@ button {
             <option value="cancelled">Cancelled</option>
         </select>
 
+        <label>Appointment Type</label>
+        <select name="appointment_type" required>
+        <option value="consultation">Consultation</option>
+        <option value="storage">Storage</option>
+        <option value="release">Release</option>
+        </select>  
+
         <button type="submit">Add Self-Storage Appointment</button>
     </form>
 </div>

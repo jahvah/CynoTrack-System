@@ -17,6 +17,7 @@ if ($action === 'create_storage_appointment') {
 
     $storage_user_id = intval($_POST['storage_user_id'] ?? 0);
     $appointment_date = $_POST['appointment_date'] ?? '';
+    $appointment_type = $_POST['appointment_type'] ?? 'storage';
     $status = $_POST['status'] ?? 'scheduled';
 
     if ($storage_user_id <= 0 || empty($appointment_date)) {
@@ -112,10 +113,10 @@ if ($action === 'create_storage_appointment') {
 
     // ✅ Insert appointment
     $stmt = $conn->prepare("
-        INSERT INTO appointments (user_type, user_id, appointment_date, type, status)
-        VALUES ('storage', ?, ?, 'storage', ?)
-    ");
-    $stmt->bind_param("iss", $storage_user_id, $appointment_date, $status);
+    INSERT INTO appointments (user_type, user_id, appointment_date, type, status)
+    VALUES ('storage', ?, ?, ?, ?)
+");
+$stmt->bind_param("isss", $storage_user_id, $appointment_date, $appointment_type, $status);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Self-storage appointment created successfully.";
@@ -131,7 +132,9 @@ if ($action === 'create_storage_appointment') {
 /* ============================================================
    ============== UPDATE SELF-STORAGE APPOINTMENT =============
    ============================================================ */
-if ($action === 'update_storage_appointment') {
+  $new_type = $_POST['appointment_type'] ?? '';
+
+   if ($action === 'update_storage_appointment') {
 
     $appointment_id = intval($_POST['appointment_id'] ?? 0);
     $new_date = $_POST['appointment_date'] ?? '';
@@ -145,7 +148,7 @@ if ($action === 'update_storage_appointment') {
 
     // Fetch current appointment
     $stmt_curr = $conn->prepare("
-        SELECT appointment_date, status, user_id
+        SELECT appointment_date, status, type, user_id
         FROM appointments 
         WHERE appointment_id = ? AND user_type = 'storage'
     ");
@@ -165,7 +168,8 @@ if ($action === 'update_storage_appointment') {
     $current_date = date('Y-m-d H:i', strtotime($current['appointment_date']));
     $new_date_normalized = date('Y-m-d H:i', strtotime($new_date));
 
-    if ($current_date === $new_date_normalized && $current['status'] === $new_status) {
+if ($current_date === $new_date_normalized && $current['status'] === $new_status && $current['type'] === $new_type)
+    {$_SESSION['error'] = "No changes detected.";
         $_SESSION['error'] = "No changes detected.";
         header("Location: StaffAppointmentSelfStorageUpdate.php?id=" . $appointment_id);
         exit();
@@ -241,12 +245,12 @@ if ($action === 'update_storage_appointment') {
     }
 
     // ✅ Update appointment
-    $stmt = $conn->prepare("
-        UPDATE appointments
-        SET appointment_date = ?, status = ?
-        WHERE appointment_id = ? AND user_type = 'storage'
-    ");
-    $stmt->bind_param("ssi", $new_date, $new_status, $appointment_id);
+$stmt = $conn->prepare("
+UPDATE appointments
+SET appointment_date = ?, type = ?, status = ?
+WHERE appointment_id = ? AND user_type = 'storage'
+");
+$stmt->bind_param("sssi", $new_date, $new_type, $new_status, $appointment_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Self-storage appointment updated successfully.";

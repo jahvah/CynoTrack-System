@@ -92,6 +92,13 @@ button {
         <label>Appointment Date & Time</label>
         <input type="datetime-local" name="appointment_date" required>
 
+        <!-- Appointment Type -->
+<label>Appointment Type</label>
+<select name="appointment_type" required>
+    <option value="consultation">Consultation</option>
+    <option value="donation">Donation</option>
+</select>   
+
         <label>Status</label>
         <select name="status" required>
             <option value="scheduled">Scheduled</option>

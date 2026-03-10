@@ -19,7 +19,7 @@ $appointment_id = intval($_GET['id']);
 
 // Fetch the donor appointment using new schema
 $stmt = $conn->prepare("
-    SELECT a.appointment_date, a.status, u.first_name, u.last_name
+    SELECT a.appointment_date, a.status, a.type, u.first_name, u.last_name
     FROM appointments a
     JOIN donors_users u ON a.user_id = u.donor_id
     WHERE a.appointment_id = ? AND a.user_type = 'donor'
@@ -86,6 +86,12 @@ button {
         <label>Appointment Date & Time</label>
         <input type="datetime-local" name="appointment_date"
             value="<?= date('Y-m-d\TH:i', strtotime($appointment['appointment_date'])); ?>">
+
+<label>Appointment Type</label>
+<select name="appointment_type" required>
+    <option value="consultation" <?= $appointment['type']=='consultation'?'selected':'' ?>>Consultation</option>
+    <option value="donation" <?= $appointment['type']=='donation'?'selected':'' ?>>Donation</option>
+</select>
 
         <label>Status</label>
         <select name="status">

@@ -16,6 +16,7 @@ if ($action === 'create_donor_appointment') {
 
     $donor_id = intval($_POST['donor_id'] ?? 0);
     $appointment_date = $_POST['appointment_date'] ?? '';
+    $appointment_type = $_POST['appointment_type'] ?? 'donation';
     $status = $_POST['status'] ?? 'scheduled';
 
     if ($donor_id <= 0 || empty($appointment_date)) {
@@ -111,10 +112,10 @@ if ($action === 'create_donor_appointment') {
 
     // ✅ Insert appointment
     $stmt = $conn->prepare("
-        INSERT INTO appointments (user_type, user_id, appointment_date, type, status)
-        VALUES ('donor', ?, ?, 'donation', ?)
-    ");
-    $stmt->bind_param("iss", $donor_id, $appointment_date, $status);
+    INSERT INTO appointments (user_type, user_id, appointment_date, type, status)
+    VALUES ('donor', ?, ?, ?, ?)
+");
+$stmt->bind_param("isss", $donor_id, $appointment_date, $appointment_type, $status);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Donor appointment created successfully.";
@@ -130,6 +131,8 @@ if ($action === 'create_donor_appointment') {
 /* ============================================================
    ================= UPDATE DONOR APPOINTMENT =================
    ============================================================ */
+   $new_type = $_POST['appointment_type'] ?? '';
+   
 if ($action === 'update_donor_appointment') {
 
     $appointment_id = intval($_POST['appointment_id'] ?? 0);
@@ -144,7 +147,7 @@ if ($action === 'update_donor_appointment') {
 
     // Fetch current appointment
     $stmt_curr = $conn->prepare("
-        SELECT appointment_date, status, user_id
+        SELECT appointment_date, status, type, user_id
         FROM appointments 
         WHERE appointment_id = ? AND user_type = 'donor'
     ");
@@ -164,8 +167,8 @@ if ($action === 'update_donor_appointment') {
     $current_date = date('Y-m-d H:i', strtotime($current['appointment_date']));
     $new_date_normalized = date('Y-m-d H:i', strtotime($new_date));
 
-    if ($current_date === $new_date_normalized && $current['status'] === $new_status) {
-        $_SESSION['error'] = "No changes detected.";
+if ($current_date === $new_date_normalized && $current['status'] === $new_status && $current['type'] === $new_type)
+    {$_SESSION['error'] = "No changes detected.";
         header("Location: StaffAppointmentDonorUpdate.php?id=" . $appointment_id);
         exit();
     }
@@ -240,12 +243,12 @@ if ($action === 'update_donor_appointment') {
     }
 
     // ✅ Update appointment
-    $stmt = $conn->prepare("
-        UPDATE appointments
-        SET appointment_date = ?, status = ?
-        WHERE appointment_id = ? AND user_type = 'donor'
-    ");
-    $stmt->bind_param("ssi", $new_date, $new_status, $appointment_id);
+$stmt = $conn->prepare("
+UPDATE appointments
+SET appointment_date = ?, type = ?, status = ?
+WHERE appointment_id = ? AND user_type = 'donor'
+");
+$stmt->bind_param("sssi", $new_date, $new_type, $new_status, $appointment_id);
 
     if ($stmt->execute()) {
         $_SESSION['success'] = "Donor appointment updated successfully.";
