@@ -18,7 +18,7 @@ if ($specimen_id <= 0) {
 }
 
 // Get specimen (storage only)
-$stmt = $conn->prepare("SELECT quantity FROM specimens 
+$stmt = $conn->prepare("SELECT quantity, status FROM specimens 
                         WHERE specimen_id = ? 
                         AND specimen_owner_type = 'storage'");
 $stmt->bind_param("i", $specimen_id);
@@ -33,31 +33,40 @@ if ($result->num_rows === 0) {
 
 $specimen = $result->fetch_assoc();
 $quantity = $specimen['quantity'];
+$current_status = $specimen['status'];
+
+if ($current_status === 'disposed') {
+    $_SESSION['error'] = "Specimen is already disposed.";
+    header("Location: ../StaffSpecimenIndex.php");
+    exit();
+}
 
 $conn->begin_transaction();
 
 try {
+    // 1️⃣ Mark specimen as disposed
+    $update_stmt = $conn->prepare("UPDATE specimens SET status = 'disposed' WHERE specimen_id = ?");
+    $update_stmt->bind_param("i", $specimen_id);
+    $update_stmt->execute();
 
-    // Insert inventory log (disposed)
-    $log_stmt = $conn->prepare("INSERT INTO inventory_logs 
-                                (specimen_id, action, quantity) 
-                                VALUES (?, 'disposed', ?)");
-    $log_stmt->bind_param("ii", $specimen_id, $quantity);
-    $log_stmt->execute();
+    // 2️⃣ Insert inventory log
+    if ($quantity > 0) {
+        $log_stmt = $conn->prepare("INSERT INTO inventory_logs (specimen_id, action, quantity) VALUES (?, 'disposed', ?)");
+        $log_stmt->bind_param("ii", $specimen_id, $quantity);
+        $log_stmt->execute();
+        $log_stmt->close();
+    }
 
-    // Delete specimen
-    $delete_stmt = $conn->prepare("DELETE FROM specimens WHERE specimen_id = ?");
-    $delete_stmt->bind_param("i", $specimen_id);
-    $delete_stmt->execute();
-
+    $update_stmt->close();
     $conn->commit();
 
-    $_SESSION['success'] = "Self-storage specimen disposed and deleted successfully.";
+    $_SESSION['success'] = "Self-storage specimen marked as disposed successfully.";
 
 } catch (Exception $e) {
     $conn->rollback();
-    $_SESSION['error'] = "Failed to delete specimen.";
+    $_SESSION['error'] = "Failed to mark specimen as disposed.";
 }
 
 header("Location: ../StaffSpecimenIndex.php");
 exit();
+?>

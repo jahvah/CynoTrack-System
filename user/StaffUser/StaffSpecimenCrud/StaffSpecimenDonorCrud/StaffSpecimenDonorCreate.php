@@ -95,6 +95,9 @@ button {
         <label>Quantity</label>
         <input type="number" name="quantity" min="1" required>
 
+        <label>Price</label>
+        <input type="number" name="price" step="0.01" min="0" required>
+
         <label>Storage Location</label>
         <input type="text" name="storage_location" required>
 

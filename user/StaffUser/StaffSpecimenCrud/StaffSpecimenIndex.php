@@ -126,105 +126,128 @@ th { background: #007bff; color: white; }
         <h2>Specimen Management</h2>
         <div>
             <a href="../StaffDashboard.php" class="back-btn">← Back to Dashboard</a>
+            <a href="StaffSpecimenDonorCrud/StaffSpecimenDonorCreate.php" class="create-btn">+ Create Donor Specimen</a>
         </div>
     </div>
 
-    <!-- Donor Specimens Section -->
-    <div class="top-bar" style="margin-top: 20px;">
-        <h3>Donor Specimens</h3>
-        <a href="StaffSpecimenDonorCrud/StaffSpecimenDonorCreate.php" class="create-btn">+ Add Donor Specimen</a>
-    </div>
+   <!-- Donor Specimens Section -->
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Unique Code</th>
+        <th>Donor Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Location</th>
+        <th>Expiration</th>
+        <th>Actions</th>
+    </tr>
 
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Unique Code</th>
-            <th>Donor Name</th>
-            <th>Quantity</th>
-            <th>Status</th>
-            <th>Location</th>
-            <th>Expiration</th>
-            <th>Actions</th>
-        </tr>
+    <?php if ($donor_result && mysqli_num_rows($donor_result) > 0): ?>
+        <?php while ($row = mysqli_fetch_assoc($donor_result)): ?>
+            <?php
+                // Apply business rules
+                $display_status = $row['status'];
+                $disable_actions = false;
 
-        <?php if ($donor_result && mysqli_num_rows($donor_result) > 0): ?>
-            <?php while ($row = mysqli_fetch_assoc($donor_result)): ?>
-                <tr>
-                    <td><?= $row['specimen_id']; ?></td>
-                    <td><strong><?= htmlspecialchars($row['unique_code']); ?></strong></td>
-                    <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
-                    <td><?= $row['quantity']; ?></td>
-                    <td>
-                        <?php
-                        $status = $row['status'];
-                        $class = 'yellow';
-                        if ($status == 'approved' || $status == 'stored') $class = 'green';
-                        if ($status == 'expired' || $status == 'disposed' || $status == 'disapproved') $class = 'red';
-                        echo "<span class='badge $class'>" . ucfirst($status) . "</span>";
-                        ?>
-                    </td>
-                    <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
-                    <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
-                    <td>
+                if ((int)$row['quantity'] === 0) {
+                    $display_status = 'used';
+                    $disable_actions = true;
+                }
+                if ($row['status'] === 'disposed') {
+                    $disable_actions = true;
+                }
+
+                // Badge class
+                $class = 'yellow';
+                if ($display_status == 'approved' || $display_status == 'stored') $class = 'green';
+                if ($display_status == 'expired' || $display_status == 'disposed' || $display_status == 'disapproved' || $display_status == 'used') $class = 'red';
+            ?>
+            <tr>
+                <td><?= $row['specimen_id']; ?></td>
+                <td><strong><?= htmlspecialchars($row['unique_code']); ?></strong></td>
+                <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
+                <td><?= $row['quantity']; ?></td>
+                <td>₱<?= isset($row['price']) ? number_format($row['price'], 2) : '0.00'; ?></td>
+                <td><span class="badge <?= $class ?>"><?= ucfirst($display_status) ?></span></td>
+                <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
+                <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
+                <td>
+                    <?php if (!$disable_actions): ?>
                         <a href="StaffSpecimenDonorCrud/StaffSpecimenDonorUpdate.php?id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
                         <a href="StaffSpecimenDonorCrud/StaffSpecimenDonorDelete.php?type=donor&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr><td colspan="8">No donor specimens found.</td></tr>
-        <?php endif; ?>
-    </table>
+                    <?php else: ?>
+                        <span style="color: gray; font-size:12px;">No actions</span>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <tr><td colspan="9">No donor specimens found.</td></tr>
+    <?php endif; ?>
+</table>
 
-    <div class="section-divider"></div>
-
-    <!-- Self-Storage Specimens Section -->
-    <div class="top-bar">
+<!-- Self-Storage Specimens Section -->
+ <div class="section-divider">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
         <h3>Self-Storage Specimens</h3>
-        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageCreate.php" class="create-btn">+ Add Storage Specimen</a>
+        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageCreate.php" class="create-btn">+ Create Storage Specimen</a>
     </div>
-
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Unique Code</th>
-            <th>User Name</th>
-            <th>Quantity</th>
-            <th>Status</th>
-            <th>Location</th>
-            <th>Expiration</th>
-            <th>Actions</th>
-        </tr>
-
-        <?php if ($storage_result && mysqli_num_rows($storage_result) > 0): ?>
-            <?php while ($row = mysqli_fetch_assoc($storage_result)): ?>
-                <tr>
-                    <td><?= $row['specimen_id']; ?></td>
-                    <td><strong><?= htmlspecialchars($row['unique_code']); ?></strong></td>
-                    <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
-                    <td><?= $row['quantity']; ?></td>
-                    <td>
-                        <?php
-                        $status = $row['status'];
-                        $class = 'yellow';
-                        if ($status == 'stored' || $status == 'approved') $class = 'green';
-                        if ($status == 'used' || $status == 'expired' || $status == 'disposed' || $status == 'disapproved') $class = 'red';
-                        echo "<span class='badge $class'>" . ucfirst($status) . "</span>";
-                        ?>
-                    </td>
-                    <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
-                    <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
-                    <td>
-                        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageUpdate.php?id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
-                        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageDelete.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr><td colspan="8">No storage specimens found.</td></tr>
-        <?php endif; ?>
-    </table>
-
 </div>
 
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Unique Code</th>
+        <th>User Name</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Location</th>
+        <th>Expiration</th>
+        <th>Actions</th>
+    </tr>
+
+    <?php if ($storage_result && mysqli_num_rows($storage_result) > 0): ?>
+        <?php while ($row = mysqli_fetch_assoc($storage_result)): ?>
+            <?php
+                $display_status = $row['status'];
+                $disable_actions = false;
+
+                if ((int)$row['quantity'] === 0) {
+                    $display_status = 'used';
+                    $disable_actions = true;
+                }
+                if ($row['status'] === 'disposed') {
+                    $disable_actions = true;
+                }
+
+                $class = 'yellow';
+                if ($display_status == 'stored' || $display_status == 'approved') $class = 'green';
+                if ($display_status == 'used' || $display_status == 'expired' || $display_status == 'disposed' || $display_status == 'disapproved') $class = 'red';
+            ?>
+            <tr>
+                <td><?= $row['specimen_id']; ?></td>
+                <td><strong><?= htmlspecialchars($row['unique_code']); ?></strong></td>
+                <td><?= htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></td>
+                <td><?= $row['quantity']; ?></td>
+                <td>₱<?= isset($row['price']) ? number_format($row['price'], 2) : '0.00'; ?></td>
+                <td><span class="badge <?= $class ?>"><?= ucfirst($display_status) ?></span></td>
+                <td><?= htmlspecialchars($row['storage_location'] ?? 'N/A'); ?></td>
+                <td><?= $row['expiration_date'] ? date("M d, Y", strtotime($row['expiration_date'])) : 'N/A'; ?></td>
+                <td>
+                    <?php if (!$disable_actions): ?>
+                        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageUpdate.php?id=<?= $row['specimen_id']; ?>" class="action-btn edit-btn">Edit</a>
+                        <a href="StaffSpecimenSelfStorageCrud/StaffSpecimenSelfStorageDelete.php?type=storage&id=<?= $row['specimen_id']; ?>" class="action-btn delete-btn" onclick="return confirm('Are you sure?');">Delete</a>
+                    <?php else: ?>
+                        <span style="color: gray; font-size:12px;">No actions</span>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <tr><td colspan="9">No storage specimens found.</td></tr>
+    <?php endif; ?>
+</table>
 <?php include('../../../includes/footer.php'); ?>

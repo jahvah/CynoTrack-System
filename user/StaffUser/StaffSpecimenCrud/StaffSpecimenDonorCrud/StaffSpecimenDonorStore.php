@@ -15,11 +15,12 @@ if ($action === 'create_donor_specimen') {
     $donor_id = $_POST['donor_id'] ?? '';
     $unique_code = trim($_POST['unique_code']);
     $quantity = (int)$_POST['quantity'];
-    $status = 'screening'; // force default
+    $price = (float)$_POST['price']; // fixed price per specimen
+    $status = 'screening';
     $storage_location = trim($_POST['storage_location']);
     $expiration_date = $_POST['expiration_date'];
 
-    // ✅ CHECK IF DONOR EXISTS
+    // CHECK IF DONOR EXISTS
     $donor_check_stmt = $conn->prepare("SELECT donor_id FROM donors_users WHERE donor_id = ?");
     $donor_check_stmt->bind_param("i", $donor_id);
     $donor_check_stmt->execute();
@@ -40,7 +41,14 @@ if ($action === 'create_donor_specimen') {
         exit();
     }
 
-    // Check duplicates in unified table
+    // Validate price
+    if ($price <= 0) {
+        $_SESSION['error'] = 'Price must be greater than 0';
+        header("Location: StaffSpecimenDonorCreate.php");
+        exit();
+    }
+
+    // Check duplicates
     $code_check = mysqli_query($conn, "SELECT 1 FROM specimens WHERE unique_code = '$unique_code'");
     $location_check = mysqli_query($conn, "SELECT 1 FROM specimens 
         WHERE specimen_owner_type = 'donor' 
@@ -62,13 +70,16 @@ if ($action === 'create_donor_specimen') {
         exit();
     }
 
-    $stmt = $conn->prepare("INSERT INTO specimens 
-        (specimen_owner_type, specimen_owner_id, unique_code, quantity, status, storage_location, expiration_date) 
-        VALUES ('donor', ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isisss", $donor_id, $unique_code, $quantity, $status, $storage_location, $expiration_date);
+    // INSERT specimen with fixed price
+    $stmt = $conn->prepare("
+        INSERT INTO specimens 
+        (specimen_owner_type, specimen_owner_id, unique_code, quantity, price, status, storage_location, expiration_date) 
+        VALUES ('donor', ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->bind_param("isidsss", $donor_id, $unique_code, $quantity, $price, $status, $storage_location, $expiration_date);
 
-    $_SESSION['success'] = $stmt->execute() 
-        ? 'Donor specimen added successfully' 
+    $_SESSION['success'] = $stmt->execute()
+        ? 'Donor specimen added successfully'
         : 'Error adding donor specimen';
 
     $stmt->close();
@@ -86,22 +97,27 @@ elseif ($action === 'update_donor_specimen') {
 
     $old_quantity = (int)$current['quantity'];
     $old_status   = $current['status'];
+    $old_price    = (float)$current['price'];
 
     // Use new values if provided
-    $quantity = isset($_POST['quantity']) && $_POST['quantity'] !== '' 
-        ? (int)$_POST['quantity'] 
+    $quantity = isset($_POST['quantity']) && $_POST['quantity'] !== ''
+        ? (int)$_POST['quantity']
         : $old_quantity;
 
-    $status = !empty($_POST['status']) 
-        ? $_POST['status'] 
+    $price = isset($_POST['price']) && $_POST['price'] !== ''
+        ? (float)$_POST['price']
+        : $old_price;
+
+    $status = !empty($_POST['status'])
+        ? $_POST['status']
         : $old_status;
 
-    $storage_location = !empty($_POST['storage_location']) 
-        ? trim($_POST['storage_location']) 
+    $storage_location = !empty($_POST['storage_location'])
+        ? trim($_POST['storage_location'])
         : $current['storage_location'];
 
-    $expiration_date = !empty($_POST['expiration_date']) 
-        ? $_POST['expiration_date'] 
+    $expiration_date = !empty($_POST['expiration_date'])
+        ? $_POST['expiration_date']
         : $current['expiration_date'];
 
     // Prevent past expiration dates
@@ -111,7 +127,7 @@ elseif ($action === 'update_donor_specimen') {
         exit();
     }
 
-    // Duplicate check (exclude current record)
+    // Duplicate location check
     if (strcasecmp($storage_location, $current['storage_location']) !== 0) {
         $check = mysqli_query($conn, "
             SELECT 1 FROM specimens 
@@ -126,25 +142,25 @@ elseif ($action === 'update_donor_specimen') {
         }
     }
 
+    // UPDATE specimen with price
     $stmt = $conn->prepare("
         UPDATE specimens 
-        SET quantity = ?, status = ?, storage_location = ?, expiration_date = ? 
+        SET quantity = ?, price = ?, status = ?, storage_location = ?, expiration_date = ?
         WHERE specimen_id = ?
     ");
-    $stmt->bind_param("isssi", $quantity, $status, $storage_location, $expiration_date, $specimen_id);
+    $stmt->bind_param("idsssi", $quantity, $price, $status, $storage_location, $expiration_date, $specimen_id);
 
     if ($stmt->execute()) {
 
-        // 1️⃣ Quantity change logging
+        // 🔹 Quantity change logging (added/subtracted quantity)
         if ($quantity != $old_quantity) {
-
             $difference = $quantity - $old_quantity;
 
             if ($difference > 0) {
                 $action_type = 'added';
                 $log_qty = $difference;
             } else {
-                $action_type = 'used';
+                $action_type = 'subtracted';
                 $log_qty = abs($difference);
             }
 
@@ -157,26 +173,18 @@ elseif ($action === 'update_donor_specimen') {
             $log_stmt->close();
         }
 
-        // 2️⃣ Status-based logging
+        // 🔹 Status based logging
         if ($status !== $old_status) {
-
             if ($status === 'stored') {
-
                 $action_type = 'added';
                 $log_qty = $quantity;
-
             } elseif ($status === 'used') {
-
                 $action_type = 'used';
                 $log_qty = $quantity;
-
             } elseif ($status === 'disposed') {
-
                 $action_type = 'disposed';
                 $log_qty = $quantity;
-
             } else {
-                // approved, disapproved, expired → NO inventory log
                 $action_type = null;
             }
 
@@ -196,7 +204,9 @@ elseif ($action === 'update_donor_specimen') {
     } else {
         $_SESSION['error'] = 'Error updating donor specimen';
     }
+
     $stmt->close();
     header("Location: StaffSpecimenDonorUpdate.php?id=$specimen_id");
     exit();
 }
+?>
